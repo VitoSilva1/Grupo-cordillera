@@ -3,6 +3,7 @@ package com.grupocordillera.authService.repository;
 import com.grupocordillera.authService.model.User;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,13 @@ import java.util.concurrent.ConcurrentMap;
 public class InMemoryUserRepository {
 
     private final ConcurrentMap<String, User> users = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void initMockUsers() {
+        save(new User("gerente", "gerente@cordillera.cl", "Gerente123!", "Gerente"));
+        save(new User("supervisor", "supervisor@cordillera.cl", "Supervisor123!", "Supervisor"));
+        save(new User("vendedor", "vendedor@cordillera.cl", "Vendedor123!", "Vendedor"));
+    }
 
     public User save(User user) {
         users.put(user.getUsername(), user);
