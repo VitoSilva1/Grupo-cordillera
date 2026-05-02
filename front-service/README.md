@@ -1,70 +1,197 @@
-# Getting Started with Create React App
+# Grupo Cordillera
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Descripción general
 
-## Available Scripts
+`Grupo Cordillera` es un monorepo de arquitectura de microservicios diseñado para soportar una aplicación corporativa con frontend, autenticación, BFF y servicio de KPIs. Cada servicio se implementa de forma independiente dentro del mismo repositorio, lo que facilita el desarrollo paralelo, las pruebas aisladas y el despliegue modular.
 
-In the project directory, you can run:
+Este proyecto está orientado a una solución enterprise ligera donde el frontend consume APIs a través de un backend for frontend (BFF) y la autenticación es gestionada por un servicio especializado.
 
-### `npm start`
+## Arquitectura del sistema
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+La arquitectura consta de cuatro servicios principales:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- `front-service`: Aplicación React que provee la interfaz de usuario.
+- `bff-service`: Backend For Frontend que actúa como intermediario entre el frontend y los servicios backend.
+- `auth-service`: Servicio de autenticación y gestión de usuarios.
+- `kpis-service`: Servicio de métricas y KPIs para la información de negocio.
 
-### `npm test`
+El flujo de comunicación general es:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. El usuario interactúa con `front-service`.
+2. El frontend realiza solicitudes al `bff-service`.
+3. El `bff-service` reenvía las peticiones a `auth-service` o `kpis-service` según corresponda.
+4. Los datos se envían de vuelta al frontend a través del BFF.
 
-### `npm run build`
+## Estructura del repositorio
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```text
+Grupo-cordillera/
+├── auth-service/
+│   ├── pom.xml
+│   ├── src/
+│   │   ├── main/java/com/grupocordillera/authService/
+│   │   │   ├── AuthServiceApplication.java
+│   │   │   ├── controller/
+│   │   │   ├── dto/
+│   │   │   ├── model/
+│   │   │   ├── repository/
+│   │   │   └── service/
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+├── bff-service/
+│   ├── package.json
+│   ├── src/
+│   │   └── index.js
+│   └── .env
+├── front-service/
+│   ├── package.json
+│   ├── public/
+│   └── src/
+│       ├── App.js
+│       ├── Login.jsx
+│       └── ...
+├── kpis-service/
+│   ├── pom.xml
+│   ├── src/
+│   │   ├── main/java/com/grupocordillera/kpis/
+│   │   └── resources/
+│   └── test/
+└── README.md
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+![Diagrama del sistema](front-service/assets/Blank diagram - Page 1.png)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+## Tecnologías utilizadas
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Frontend**: React, Create React App
+- **Backend BFF**: Node.js, Express, CORS
+- **Autenticación**: Spring Boot, Java 17
+- **KPIs**: Spring Boot, Java 17
+- **Construcción**: Maven para servicios Java
+- **Gestión de dependencias**: npm para frontend y BFF
+- **Comunicación**: APIs REST JSON
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Instalación paso a paso
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Clonar el repositorio:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+git clone https://tu-repositorio/Grupo-cordillera.git
+cd Grupo-cordillera
+```
 
-## Learn More
+2. Instalar dependencias del frontend:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+cd front-service
+npm install
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+3. Instalar dependencias del BFF:
 
-### Code Splitting
+```bash
+cd ../bff-service
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+4. Instalar dependencias de los servicios Java:
 
-### Analyzing the Bundle Size
+```bash
+cd ../auth-service
+mvn clean install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+cd ../kpis-service
+mvn clean install
+```
 
-### Making a Progressive Web App
+## Cómo ejecutar el frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Desde la carpeta `front-service`:
 
-### Advanced Configuration
+```bash
+cd front-service
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Luego abrir en el navegador:
 
-### Deployment
+```text
+http://localhost:3000
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Cómo se comunican los servicios
 
-### `npm run build` fails to minify
+El `front-service` no llama directamente a los servicios backend. En su lugar, usa el `bff-service` como intermediario:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `front-service` → `bff-service` (`http://localhost:8000`)
+- `bff-service` → `auth-service` / `kpis-service`
+
+Esto permite centralizar rutas, políticas de CORS, agregación de respuestas y seguridad en un solo punto.
+
+## Autenticación
+
+El `auth-service` gestiona el login y el registro de usuarios. En este proyecto, se utiliza un repositorio en memoria para datos mock, ya que no existe una base de datos real implementada.
+
+Rutas principales del `auth-service`:
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/auth/health`
+- `GET /api/auth/users/me`
+
+El componente `Login.jsx` del frontend envía las credenciales al BFF y éste las reenvía al `auth-service`.
+
+## KPIs
+
+El `kpis-service` está diseñado para exponer métricas y datos de negocio a través de APIs REST. Este servicio puede entregar información agregada como ventas, rendimiento de sucursales, indicadores de canales y alertas.
+
+Rutas típicas:
+
+- `GET /api/kpis/summary`
+- `GET /api/kpis/sales/monthly`
+- `GET /api/kpis/branches/performance`
+- `GET /api/kpis/channels`
+- `GET /api/kpis/alerts`
+
+## Buenas prácticas del proyecto
+
+- Utilizar flujo de Git basado en ramas: `main`, `develop`, `feature/*`
+- Ejemplo de rama: `feature/login`
+- Realizar commits claros y atómicos
+- Mantener la lógica de cada servicio aislada
+- Documentar cambios relevantes en el README y en los commits
+
+## Variables de entorno
+
+Ejemplo de `.env` para `bff-service`:
+
+```env
+PORT=8000
+AUTH_API_URL=http://localhost:8080/api/auth
+KPIS_API_URL=http://localhost:8081/api/kpis
+ALLOWED_ORIGINS=http://localhost:3000
+```
+
+Ejemplo de `.env` para `front-service` (opcional si se añaden variables):
+
+```env
+REACT_APP_API_BASE_URL=http://localhost:8000/api
+```
+
+## Equipo / Autor
+
+- Nombre: Solange Argomedo - Jose Astorga - Victor Silva
+
+
+## Notas finales y consideraciones
+
+- Este repositorio está construido como un monorepo de servicios independientes para facilitar pruebas y despliegues paralelos.
+- En un entorno productivo, se recomienda agregar una base de datos persistente, manejo de tokens JWT, seguridad de CORS y validaciones adicionales.
+- Si se requiere, se puede extender el BFF para proveer caches, autenticación centralizada y versionado de API.
+- Mantener documentadas las dependencias y versiones en cada servicio garantiza mayor robustez.
+
+---
+
+`Grupo Cordillera` es una base sólida para continuar la evolución hacia una plataforma empresarial completa con frontend web, BFF, autenticación y métricas centralizadas.
