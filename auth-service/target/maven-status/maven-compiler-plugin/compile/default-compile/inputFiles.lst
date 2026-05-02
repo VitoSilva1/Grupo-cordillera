@@ -1,8 +1,8 @@
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/AuthServiceApplication.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/config/WebConfig.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/controller/UserController.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/dto/UserDto.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/dto/UserProfileDto.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/model/User.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/repository/InMemoryUserRepository.java
-/Users/victorsilvaormeno/Documents/FullstackIII/grupoCordillera/Grupo-cordillera-back/auth-service/src/main/java/com/grupocordillera/authService/service/UserService.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/AuthServiceApplication.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/config/WebConfig.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/controller/UserController.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/dto/UserDto.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/dto/UserProfileDto.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/model/User.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/repository/InMemoryUserRepository.java
+/Users/victorsilvaormeno/Documents/FullstackIII/grupo-cordillera/Grupo-cordillera/auth-service/src/main/java/com/grupocordillera/authService/service/UserService.java

@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 
+const API_BASE_URL = process.env.REACT_APP_BFF_API_URL || 'http://localhost:8000';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +40,7 @@ const Login = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,9 +54,26 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        const usersResponse = await fetch(`${API_BASE_URL}/api/auth/users`);
+        const users = usersResponse.ok ? await usersResponse.json() : [];
+        const normalizedEmail = email.trim().toLowerCase();
+        const matchedUser = users.find(
+          (user) =>
+            user.email?.toLowerCase() === normalizedEmail ||
+            user.username?.toLowerCase() === normalizedEmail ||
+            user.username?.toLowerCase() === data.username?.toLowerCase()
+        );
+
+        const dashboardResponse = await fetch(`${API_BASE_URL}/api/dashboard`);
+        const dashboardJson = dashboardResponse.ok ? await dashboardResponse.json() : null;
+
+        setCurrentUser({
+          username: matchedUser?.username || data.username || email,
+          email: matchedUser?.email || email,
+          role: matchedUser?.role || 'Vendedor',
+        });
+        setDashboardData(dashboardJson);
         setMessage('Autenticación exitosa');
-        console.log('Respuesta del servidor:', data);
-        // Aquí puedes manejar el login exitoso, como redirigir o guardar token
       } else {
         setErrors({ general: data.error || 'Error en la autenticación' });
       }
@@ -63,6 +84,104 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  const logout = () => {
+    setCurrentUser(null);
+    setDashboardData(null);
+    setMessage('');
+    setPassword('');
+  };
+
+  const renderKpiProfile = () => {
+    if (!currentUser) return null;
+
+    const role = currentUser.role;
+    const summary = dashboardData?.summary;
+    const sales = dashboardData?.sales || [];
+    const branches = dashboardData?.branches || [];
+    const alerts = dashboardData?.alerts || [];
+    const channels = dashboardData?.channels || [];
+
+    return (
+      <div style={{ width: '100%', maxWidth: '980px' }}>
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          padding: '24px',
+          marginBottom: '16px'
+        }}>
+          <h2 style={{ margin: '0 0 8px 0', color: '#1f2937' }}>Perfil KPI</h2>
+          <p style={{ margin: 0, color: '#4b5563' }}>
+            Usuario: <strong>{currentUser.email}</strong> | Rol: <strong>{role}</strong>
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '12px'
+        }}>
+          {(role === 'Gerente' || role === 'Vendedor') && summary && (
+            <>
+              <KpiCard title="Ventas Totales" value={summary.ventasTotales} />
+              <KpiCard title="Ticket Promedio" value={summary.ticketPromedio} />
+            </>
+          )}
+          {(role === 'Gerente' || role === 'Supervisor') && summary && (
+            <>
+              <KpiCard title="Margen Utilidad (%)" value={summary.margenUtilidad} />
+              <KpiCard title="Stock Crítico" value={summary.stockCritico} />
+              <KpiCard title="Reclamos Activos" value={summary.reclamosActivos} />
+            </>
+          )}
+          {role === 'Gerente' && (
+            <KpiCard title="Canales de Venta" value={channels.length} />
+          )}
+          {role === 'Supervisor' && (
+            <KpiCard title="Sucursales Monitoreadas" value={branches.length} />
+          )}
+          {role === 'Vendedor' && (
+            <KpiCard title="Ventas Mensuales Cargadas" value={sales.length} />
+          )}
+          <KpiCard title="Alertas Activas" value={alerts.length} />
+        </div>
+
+        <div style={{ marginTop: '16px', textAlign: 'right' }}>
+          <button
+            type="button"
+            onClick={logout}
+            style={{
+              padding: '10px 16px',
+              backgroundColor: '#1f2937',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  if (currentUser) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        minHeight: '100vh',
+        padding: '32px',
+        backgroundColor: '#f5f5f5',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        {renderKpiProfile()}
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -175,5 +294,19 @@ const Login = () => {
     </div>
   );
 };
+
+const KpiCard = ({ title, value }) => (
+  <div style={{
+    backgroundColor: '#fff',
+    borderRadius: '10px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    padding: '16px'
+  }}>
+    <p style={{ margin: '0 0 6px 0', color: '#6b7280', fontSize: '14px' }}>{title}</p>
+    <p style={{ margin: 0, color: '#111827', fontSize: '24px', fontWeight: 700 }}>
+      {value ?? '-'}
+    </p>
+  </div>
+);
 
 export default Login;
