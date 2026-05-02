@@ -1,0 +1,8 @@
+com/grupocordillera/authService/AuthServiceApplication.class
+com/grupocordillera/authService/model/User.class
+com/grupocordillera/authService/service/UserService.class
+com/grupocordillera/authService/repository/InMemoryUserRepository.class
+com/grupocordillera/authService/controller/UserController.class
+com/grupocordillera/authService/dto/UserProfileDto.class
+com/grupocordillera/authService/config/WebConfig.class
+com/grupocordillera/authService/dto/UserDto.class
