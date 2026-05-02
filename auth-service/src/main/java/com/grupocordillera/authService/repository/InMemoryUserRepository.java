@@ -3,7 +3,7 @@ package com.grupocordillera.authService.repository;
 import com.grupocordillera.authService.model.User;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +17,9 @@ public class InMemoryUserRepository {
 
     @PostConstruct
     public void initMockUsers() {
-        save(new User("gerente", "gerente@cordillera.cl", "Gerente123!", "Gerente"));
-        save(new User("supervisor", "supervisor@cordillera.cl", "Supervisor123!", "Supervisor"));
-        save(new User("vendedor", "vendedor@cordillera.cl", "Vendedor123!", "Vendedor"));
+        save(new User("gerente", "gerente@cordillera.cl", "1234", "Gerente"));
+        save(new User("supervisor", "supervisor@cordillera.cl", "1234", "Supervisor"));
+        save(new User("vendedor", "vendedor@cordillera.cl", "1234", "Vendedor"));
     }
 
     public User save(User user) {
@@ -29,6 +29,12 @@ public class InMemoryUserRepository {
 
     public Optional<User> findByUsername(String username) {
         return Optional.ofNullable(users.get(username));
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return users.values().stream()
+                .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                .findFirst();
     }
 
     public boolean existsByUsername(String username) {

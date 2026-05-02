@@ -47,9 +47,12 @@ public class UserService {
     public boolean authenticate(UserDto userDto) {
         validateLoginDto(userDto);
 
-        String username = userDto.getUsername().trim();
-        return userRepository.findByUsername(username)
-                .map(user -> user.getPassword().equals(userDto.getPassword()))
+        String login = userDto.getUsername().trim();
+        Optional<User> user = userRepository.findByUsername(login)
+                .or(() -> userRepository.findByEmail(login));
+
+        return user
+                .map(foundUser -> foundUser.getPassword().equals(userDto.getPassword()))
                 .orElse(false);
     }
 
