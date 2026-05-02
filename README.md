@@ -60,7 +60,7 @@ Grupo-cordillera/
 └── README.md
 ```
 
-![Diagrama del sistema](front-service/assets/diagrama.png)
+<img src="front-service/assets/diagrama.png" width="950"/>
 
 
 ## Tecnologías utilizadas
