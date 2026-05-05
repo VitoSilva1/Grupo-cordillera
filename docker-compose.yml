@@ -28,9 +28,9 @@ services:
     ports:
       - "8000:8000"
 
-  front-service:
+  front-web:
     build:
-      context: ./front-service
+      context: ./front-web
       args:
         REACT_APP_BFF_API_URL: http://localhost:8000
     container_name: grupo-cordillera-front

@@ -10,14 +10,14 @@ Este proyecto está orientado a una solución enterprise ligera donde el fronten
 
 La arquitectura consta de cuatro servicios principales:
 
-- `front-service`: Aplicación React que provee la interfaz de usuario.
+- `front-web`: Aplicación React que provee la interfaz de usuario.
 - `bff-service`: Backend For Frontend que actúa como intermediario entre el frontend y los servicios backend.
 - `auth-service`: Servicio de autenticación y gestión de usuarios.
 - `kpis-service`: Servicio de métricas y KPIs para la información de negocio.
 
 El flujo de comunicación general es:
 
-1. El usuario interactúa con `front-service`.
+1. El usuario interactúa con `front-web`.
 2. El frontend realiza solicitudes al `bff-service`.
 3. El `bff-service` reenvía las peticiones a `auth-service` o `kpis-service` según corresponda.
 4. Los datos se envían de vuelta al frontend a través del BFF.
@@ -44,7 +44,7 @@ Grupo-cordillera/
 │   ├── src/
 │   │   └── index.js
 │   └── .env
-├── front-service/
+├── front-web/
 │   ├── package.json
 │   ├── public/
 │   └── src/
@@ -60,7 +60,7 @@ Grupo-cordillera/
 └── README.md
 ```
 
-<img src="front-service/assets/diagrama.png" width="950"/>
+<img src="front-web/assets/diagrama.png" width="950"/>
 
 
 ## Tecnologías utilizadas
@@ -85,7 +85,7 @@ cd Grupo-cordillera
 2. Instalar dependencias del frontend:
 
 ```bash
-cd front-service
+cd front-web
 npm install
 ```
 
@@ -108,10 +108,10 @@ mvn clean install
 
 ## Cómo ejecutar el frontend
 
-Desde la carpeta `front-service`:
+Desde la carpeta `front-web`:
 
 ```bash
-cd front-service
+cd front-web
 npm start
 ```
 
@@ -123,9 +123,9 @@ http://localhost:3000
 
 ## Cómo se comunican los servicios
 
-El `front-service` no llama directamente a los servicios backend. En su lugar, usa el `bff-service` como intermediario:
+El `front-web` no llama directamente a los servicios backend. En su lugar, usa el `bff-service` como intermediario:
 
-- `front-service` → `bff-service` (`http://localhost:8000`)
+- `front-web` → `bff-service` (`http://localhost:8000`)
 - `bff-service` → `auth-service` / `kpis-service`
 
 Esto permite centralizar rutas, políticas de CORS, agregación de respuestas y seguridad en un solo punto.
@@ -174,7 +174,7 @@ KPIS_API_URL=http://localhost:8081/api/kpis
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-Ejemplo de `.env` para `front-service` (opcional si se añaden variables):
+Ejemplo de `.env` para `front-web` (opcional si se añaden variables):
 
 ```env
 REACT_APP_API_BASE_URL=http://localhost:8000/api
