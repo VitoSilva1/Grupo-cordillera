@@ -1,0 +1,40 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: grupo-cordillera-auth
+    ports:
+      - "8080:8080"
+
+  kpis-service:
+    build:
+      context: ./kpis-service
+    container_name: grupo-cordillera-kpis
+    ports:
+      - "8081:8081"
+
+  bff-service:
+    build:
+      context: ./bff-service
+    container_name: grupo-cordillera-bff
+    environment:
+      PORT: 8000
+      AUTH_API_URL: http://auth-service:8080/api/auth
+      KPIS_API_URL: http://kpis-service:8081/api/kpis
+      ALLOWED_ORIGINS: http://localhost:5173
+    depends_on:
+      - auth-service
+      - kpis-service
+    ports:
+      - "8000:8000"
+
+  front-web:
+    build:
+      context: ./front-web
+      args:
+        REACT_APP_BFF_API_URL: http://localhost:8000
+    container_name: grupo-cordillera-front
+    depends_on:
+      - bff-service
+    ports:
+      - "5173:80"

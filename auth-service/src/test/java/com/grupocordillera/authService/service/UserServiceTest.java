@@ -57,6 +57,13 @@ class UserServiceTest {
     }
 
     @Test
+    void authenticateShouldReturnTrueWhenUsingEmailAsLogin() {
+        userService.register(new UserDto("victor@mail.com", "victor", "1234", "Gerente"));
+
+        assertTrue(userService.authenticate(new UserDto(null, "victor@mail.com", "1234", null)));
+    }
+
+    @Test
     void registerShouldFailWhenEmailAlreadyExists() {
         userService.register(new UserDto("victor@mail.com", "victor", "1234", "Gerente"));
 
