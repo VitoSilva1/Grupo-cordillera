@@ -30,9 +30,9 @@ services:
 
   front-web:
     build:
-      context: ./front-web
+      context: ./front-web2
       args:
-        REACT_APP_BFF_API_URL: http://localhost:8000
+        VITE_USERS_API_URL: http://localhost:8000/api/auth
     container_name: grupo-cordillera-front
     depends_on:
       - bff-service
