@@ -4,14 +4,14 @@ services:
       context: ./auth-service
     container_name: grupo-cordillera-auth
     ports:
-      - "8080:8080"
+      - "9080:8080"
 
   kpis-service:
     build:
       context: ./kpis-service
     container_name: grupo-cordillera-kpis
     ports:
-      - "8081:8081"
+      - "9081:8081"
 
   bff-service:
     build:
@@ -30,9 +30,9 @@ services:
 
   front-web:
     build:
-      context: ./front-web
+      context: ./front-web2
       args:
-        REACT_APP_BFF_API_URL: http://localhost:8000
+        VITE_USERS_API_URL: http://localhost:8000/api/auth
     container_name: grupo-cordillera-front
     depends_on:
       - bff-service
