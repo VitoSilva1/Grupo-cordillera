@@ -4,14 +4,14 @@ services:
       context: ./auth-service
     container_name: grupo-cordillera-auth
     ports:
-      - "8080:8080"
+      - "9080:8080"
 
   kpis-service:
     build:
       context: ./kpis-service
     container_name: grupo-cordillera-kpis
     ports:
-      - "8081:8081"
+      - "9081:8081"
 
   bff-service:
     build:
