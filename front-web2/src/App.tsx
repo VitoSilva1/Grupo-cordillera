@@ -1,39 +1,53 @@
 import { Route, Switch } from 'wouter';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
+import { Login } from './components/Login';
 import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
-import { userService } from './services/userService';
-import { mockApi } from './services/mockApi';
 import type { UserProfile } from './types/user';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
 
+const SESSION_USER_KEY = 'grupo-cordillera-user';
+
+const getSessionUser = (): UserProfile | null => {
+  const storedUser = sessionStorage.getItem(SESSION_USER_KEY);
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser) as UserProfile;
+  } catch {
+    sessionStorage.removeItem(SESSION_USER_KEY);
+    return null;
+  }
+};
+
 function App() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => getSessionUser());
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const currentUser = await userService.getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error('Error fetching current user', error);
-        const fallbackUser = await mockApi.getCurrentUser();
-        setUser(fallbackUser);
-      }
-    };
+  const handleLogin = (authenticatedUser: UserProfile) => {
+    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(authenticatedUser));
+    setUser(authenticatedUser);
+  };
 
-    fetchUser();
-  }, []);
+  const handleLogout = () => {
+    sessionStorage.removeItem(SESSION_USER_KEY);
+    setUser(null);
+  };
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
       <Sidebar />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <Header user={user} />
+        <Header user={user} onLogout={handleLogout} />
 
         <main className="flex-1 overflow-y-auto">
           <Switch>

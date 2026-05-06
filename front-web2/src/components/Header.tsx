@@ -1,8 +1,9 @@
-import { Calendar, ChevronDown, MapPin, UserCircle } from 'lucide-react';
+import { Calendar, ChevronDown, LogOut, MapPin, UserCircle } from 'lucide-react';
 import type { UserProfile } from '../types/user';
 
 interface HeaderProps {
   user: UserProfile | null;
+  onLogout?: () => void;
 }
 
 const roleAvatarMap: Record<string, string> = {
@@ -29,7 +30,7 @@ const getAvatarByRole = (user: UserProfile | null) => {
   return matchingRole ? roleAvatarMap[matchingRole] : user.avatarUrl ?? null;
 };
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, onLogout }: HeaderProps) {
   const avatarSrc = getAvatarByRole(user);
 
   return (
@@ -78,6 +79,18 @@ export function Header({ user }: HeaderProps) {
             <UserCircle size={32} className="text-slate-400" />
           )}
         </div>
+
+        {onLogout && (
+          <button
+            type="button"
+            onClick={onLogout}
+            className="w-9 h-9 rounded-md border border-slate-200 text-slate-500 flex items-center justify-center transition hover:bg-slate-50 hover:text-slate-800"
+            title="Cerrar sesion"
+            aria-label="Cerrar sesion"
+          >
+            <LogOut size={17} />
+          </button>
+        )}
       </div>
     </header>
   );
