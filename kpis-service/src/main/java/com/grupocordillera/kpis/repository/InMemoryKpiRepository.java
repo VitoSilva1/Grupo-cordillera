@@ -1,19 +1,20 @@
 package com.grupocordillera.kpis.repository;
 
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
 import com.grupocordillera.kpis.dto.AlertResponse;
 import com.grupocordillera.kpis.dto.BranchPerformanceResponse;
 import com.grupocordillera.kpis.dto.MonthlySalesResponse;
 import com.grupocordillera.kpis.dto.SalesChannelResponse;
 import com.grupocordillera.kpis.model.AlertStatus;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public class InMemoryKpiRepository {
 
     public long getVentasTotales() {
-        return 145000000L;
+        return 20000L;
     }
 
     public double getMargenUtilidad() {

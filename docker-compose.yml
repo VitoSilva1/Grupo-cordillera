@@ -33,6 +33,7 @@ services:
       context: ./front-web2
       args:
         VITE_USERS_API_URL: http://localhost:8000/api/auth
+        VITE_KPIS_API_URL: http://localhost:8000/api/kpis
     container_name: grupo-cordillera-front
     depends_on:
       - bff-service

@@ -3,6 +3,8 @@ WORKDIR /app
 
 ARG VITE_USERS_API_URL=http://localhost:8081/api
 ENV VITE_USERS_API_URL=$VITE_USERS_API_URL
+ARG VITE_KPIS_API_URL=http://localhost:8000/api/kpis
+ENV VITE_KPIS_API_URL=$VITE_KPIS_API_URL
 
 COPY package.json package-lock.json ./
 RUN npm ci

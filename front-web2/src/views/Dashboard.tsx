@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { mockApi } from '../services/mockApi';
+import { kpisService } from '../services/kpisService';
 import type { 
   KpiSummary, 
   MonthlySales, 
   BranchPerformance, 
   SalesChannel, 
   Alert 
-} from '../services/mockApi';
+} from '../services/kpisService';
 import { KpiCard } from '../components/KpiCard';
 import { 
   DollarSign, 
@@ -59,11 +59,11 @@ export function Dashboard() {
           channelsData,
           alertsData
         ] = await Promise.all([
-          mockApi.getSummary(),
-          mockApi.getSales(),
-          mockApi.getBranchesPerformance(),
-          mockApi.getSalesByChannel(),
-          mockApi.getAlerts()
+          kpisService.getSummary(),
+          kpisService.getSales(),
+          kpisService.getBranchesPerformance(),
+          kpisService.getSalesByChannel(),
+          kpisService.getAlerts()
         ]);
 
         setSummary(summaryData);
@@ -180,7 +180,7 @@ export function Dashboard() {
                   cursor={{ fill: '#f1f5f9' }}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
-                <Bar dataKey="desempeño" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
+                <Bar dataKey="desempeno" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>

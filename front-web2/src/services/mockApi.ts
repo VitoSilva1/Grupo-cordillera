@@ -48,7 +48,7 @@ export const mockApi = {
   getSummary: async (): Promise<KpiSummary> => {
     await delay(500);
     return {
-      ventasTotales: 145000000, // 145M CLP
+      ventasTotales: 20000, // 145M CLP
       margenUtilidad: 32.5, // 32.5%
       stockCritico: 18,
       reclamosActivos: 5,
