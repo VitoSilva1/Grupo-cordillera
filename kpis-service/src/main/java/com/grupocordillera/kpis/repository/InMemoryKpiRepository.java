@@ -5,6 +5,7 @@ import com.grupocordillera.kpis.dto.BranchPerformanceResponse;
 import com.grupocordillera.kpis.dto.MonthlySalesResponse;
 import com.grupocordillera.kpis.dto.SalesChannelResponse;
 import com.grupocordillera.kpis.model.AlertStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,80 +13,82 @@ import java.util.List;
 @Repository
 public class InMemoryKpiRepository {
 
+    private final JdbcTemplate jdbcTemplate;
+
+    public InMemoryKpiRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     public long getVentasTotales() {
-        return 145000000L;
+        return jdbcTemplate.queryForObject("SELECT ventas_totales FROM kpi_summary WHERE id = 1", Long.class);
     }
 
     public double getMargenUtilidad() {
-        return 32.5;
+        Double value = jdbcTemplate.queryForObject("SELECT margen_utilidad FROM kpi_summary WHERE id = 1", Double.class);
+        return value == null ? 0.0 : value;
     }
 
     public int getStockCritico() {
-        return 18;
+        Integer value = jdbcTemplate.queryForObject("SELECT stock_critico FROM kpi_summary WHERE id = 1", Integer.class);
+        return value == null ? 0 : value;
     }
 
     public int getReclamosActivos() {
-        return 5;
+        Integer value = jdbcTemplate.queryForObject("SELECT reclamos_activos FROM kpi_summary WHERE id = 1", Integer.class);
+        return value == null ? 0 : value;
     }
 
     public long getTicketPromedio() {
-        return 45000L;
+        Long value = jdbcTemplate.queryForObject("SELECT ticket_promedio FROM kpi_summary WHERE id = 1", Long.class);
+        return value == null ? 0L : value;
     }
 
     public int getSatisfaccionCliente() {
-        return 94;
+        Integer value = jdbcTemplate.queryForObject("SELECT satisfaccion_cliente FROM kpi_summary WHERE id = 1", Integer.class);
+        return value == null ? 0 : value;
     }
 
     public List<MonthlySalesResponse> getMonthlySales() {
-        return List.of(
-                new MonthlySalesResponse("Ene", 110),
-                new MonthlySalesResponse("Feb", 95),
-                new MonthlySalesResponse("Mar", 125),
-                new MonthlySalesResponse("Abr", 115),
-                new MonthlySalesResponse("May", 140),
-                new MonthlySalesResponse("Jun", 145)
+        return jdbcTemplate.query(
+                "SELECT month_label, sales_value FROM monthly_sales ORDER BY CASE month_label " +
+                        "WHEN 'Ene' THEN 1 WHEN 'Feb' THEN 2 WHEN 'Mar' THEN 3 WHEN 'Abr' THEN 4 " +
+                        "WHEN 'May' THEN 5 WHEN 'Jun' THEN 6 ELSE 99 END",
+                (rs, rowNum) -> new MonthlySalesResponse(
+                        rs.getString("month_label"),
+                        rs.getInt("sales_value")
+                )
         );
     }
 
     public List<BranchPerformanceResponse> getBranchPerformance() {
-        return List.of(
-                new BranchPerformanceResponse("Santiago Centro", 98),
-                new BranchPerformanceResponse("Providencia", 85),
-                new BranchPerformanceResponse("Viña del Mar", 72),
-                new BranchPerformanceResponse("Concepción", 65)
+        return jdbcTemplate.query(
+                "SELECT branch_name, score FROM branch_performance ORDER BY score DESC",
+                (rs, rowNum) -> new BranchPerformanceResponse(
+                        rs.getString("branch_name"),
+                        rs.getInt("score")
+                )
         );
     }
 
     public List<SalesChannelResponse> getSalesChannels() {
-        return List.of(
-                new SalesChannelResponse("Tiendas Físicas", 65),
-                new SalesChannelResponse("E-commerce", 25),
-                new SalesChannelResponse("Venta Telefónica", 10)
+        return jdbcTemplate.query(
+                "SELECT channel_name, percentage FROM sales_channels ORDER BY percentage DESC",
+                (rs, rowNum) -> new SalesChannelResponse(
+                        rs.getString("channel_name"),
+                        rs.getInt("percentage")
+                )
         );
     }
 
     public List<AlertResponse> getAlerts() {
-        return List.of(
-                new AlertResponse(
-                        "1",
-                        "Stock Crítico",
-                        AlertStatus.CRITICO,
-                        "2026-04-27",
-                        "Quiebre de stock en línea blanca, sucursal Providencia."
-                ),
-                new AlertResponse(
-                        "2",
-                        "Reclamos",
-                        AlertStatus.ADVERTENCIA,
-                        "2026-04-26",
-                        "Aumento inusual de reclamos por demoras en despacho."
-                ),
-                new AlertResponse(
-                        "3",
-                        "Ventas",
-                        AlertStatus.INFORMATIVO,
-                        "2026-04-25",
-                        "Meta semanal de ventas superada en Santiago Centro."
+        return jdbcTemplate.query(
+                "SELECT id, title, status, date_label, description FROM alerts ORDER BY date_label DESC",
+                (rs, rowNum) -> new AlertResponse(
+                        rs.getString("id"),
+                        rs.getString("title"),
+                        AlertStatus.valueOf(rs.getString("status")),
+                        rs.getString("date_label"),
+                        rs.getString("description")
                 )
         );
     }
