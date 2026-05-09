@@ -1,6 +1,7 @@
 package com.grupocordillera.authService.service;
 
 import com.grupocordillera.authService.dto.UserDto;
+import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
 import com.grupocordillera.authService.repository.InMemoryUserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,8 +37,7 @@ class UserServiceTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.register(new UserDto("otro@mail.com", "victor", "abcd", "Supervisor"))
-        );
+                () -> userService.register(new UserDto("otro@mail.com", "victor", "abcd", "Supervisor")));
 
         assertEquals("El usuario ya existe", exception.getMessage());
     }
@@ -69,8 +69,7 @@ class UserServiceTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.register(new UserDto("victor@mail.com", "victor2", "abcd", "Supervisor"))
-        );
+                () -> userService.register(new UserDto("victor@mail.com", "victor2", "abcd", "Supervisor")));
 
         assertEquals("El email ya existe", exception.getMessage());
     }
@@ -79,9 +78,43 @@ class UserServiceTest {
     void registerShouldFailWhenRoleIsInvalid() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> userService.register(new UserDto("victor@mail.com", "victor", "1234", "Admin"))
-        );
+                () -> userService.register(new UserDto("victor@mail.com", "victor", "1234", "Admin")));
 
         assertEquals("El role debe ser Gerente, Supervisor o Vendedor", exception.getMessage());
+    }
+
+    @Test
+    void getCurrentUserProfileShouldReturnGuestWhenNoUserExists() {
+        UserProfileDto profile = userService.getCurrentUserProfile();
+
+        assertEquals("guest", profile.id());
+        assertEquals("Invitado", profile.name());
+        assertEquals("Sin cargo", profile.role());
+    }
+
+    @Test
+    void getMockUserProfileShouldReturnSupervisor() {
+        UserProfileDto profile = userService.getMockUserProfile("Supervisor");
+
+        assertEquals("mock-supervisor", profile.id());
+        assertEquals("Supervisor", profile.role());
+    }
+
+    @Test
+    void authenticateShouldThrowWhenUsernameIsMissing() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.authenticate(new UserDto(null, "", "1234", null)));
+
+        assertEquals("El username es obligatorio", exception.getMessage());
+    }
+
+    @Test
+    void registerShouldFailWhenEmailFormatIsInvalid() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.register(new UserDto("victor.mail.com", "victor", "1234", "Gerente")));
+
+        assertEquals("El email no es valido", exception.getMessage());
     }
 }
