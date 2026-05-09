@@ -3,7 +3,7 @@ package com.grupocordillera.authService.service;
 import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.InMemoryUserRepository;
+import com.grupocordillera.authService.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +16,10 @@ public class UserService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of("Gerente", "Supervisor", "Vendedor");
 
-    private final InMemoryUserRepository userRepository;
+    private final UserRepository userRepository;
     
 
-    public UserService(InMemoryUserRepository userRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -49,7 +49,7 @@ public class UserService {
 
         String login = userDto.getUsername().trim();
         Optional<User> user = userRepository.findByUsername(login)
-                .or(() -> userRepository.findByEmail(login));
+                .or(() -> userRepository.findByEmailIgnoreCase(login));
 
         return user
                 .map(foundUser -> foundUser.getPassword().equals(userDto.getPassword()))

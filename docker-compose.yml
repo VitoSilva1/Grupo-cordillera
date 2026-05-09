@@ -1,8 +1,60 @@
 services:
+  auth-db:
+    image: postgres:16
+    container_name: grupo-cordillera-auth-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+
+  kpis-db:
+    image: postgres:16
+    container_name: grupo-cordillera-kpis-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kpis_db
+      POSTGRES_USER: kpis_user
+      POSTGRES_PASSWORD: kpis_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kpis_user -d kpis_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5434:5432"
+    volumes:
+      - kpis-db-data:/var/lib/postgresql/data
+
   auth-service:
     build:
       context: ./auth-service
     container_name: grupo-cordillera-auth
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_pass
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/auth/health >/dev/null 2>&1 || curl -fsS http://localhost:8080/api/auth/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     ports:
       - "9080:8080"
 
@@ -10,6 +62,20 @@ services:
     build:
       context: ./kpis-service
     container_name: grupo-cordillera-kpis
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://kpis-db:5432/kpis_db
+      SPRING_DATASOURCE_USERNAME: kpis_user
+      SPRING_DATASOURCE_PASSWORD: kpis_pass
+    depends_on:
+      kpis-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/api/kpis/health >/dev/null 2>&1 || curl -fsS http://localhost:8081/api/kpis/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     ports:
       - "9081:8081"
 
@@ -17,14 +83,23 @@ services:
     build:
       context: ./bff-service
     container_name: grupo-cordillera-bff
+    restart: unless-stopped
     environment:
       PORT: 8000
       AUTH_API_URL: http://auth-service:8080/api/auth
       KPIS_API_URL: http://kpis-service:8081/api/kpis
       ALLOWED_ORIGINS: http://localhost:5173
     depends_on:
-      - auth-service
-      - kpis-service
+      auth-service:
+        condition: service_healthy
+      kpis-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health >/dev/null 2>&1 || curl -fsS http://localhost:8000/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
     ports:
       - "8000:8000"
 
@@ -34,7 +109,13 @@ services:
       args:
         VITE_USERS_API_URL: http://localhost:8000/api/auth
     container_name: grupo-cordillera-front
+    restart: unless-stopped
     depends_on:
-      - bff-service
+      bff-service:
+        condition: service_healthy
     ports:
       - "5173:80"
+
+volumes:
+  auth-db-data:
+  kpis-db-data:
