@@ -97,6 +97,4 @@ app.use((error, _req, res, _next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`bff-service running on http://localhost:${PORT}`);
-});
+export default app;
