@@ -6,7 +6,7 @@ import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
 import type { UserProfile } from './types/user';
-import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session';
+import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session-utils';
 import { useState } from 'react';
 import './App.css';
 

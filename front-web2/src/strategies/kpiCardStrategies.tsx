@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { KpiSummary } from '../services/mockApi';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency } from '../utils/formatters-utils';
 
 interface KpiCardStrategy {
   title: string;
