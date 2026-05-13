@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { mockApi } from '../services/mockApi';
 import type { KpiSummary } from '../services/mockApi';
 import { KpiCard } from '../components/KpiCard';
-import { DollarSign, TrendingUp, PackageMinus, AlertOctagon, Receipt, Smile } from 'lucide-react';
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0
-  }).format(value);
-};
+import { kpiCardStrategies } from '../strategies/kpiCardStrategies';
 
 export function KpisView() {
   const [summary, setSummary] = useState<KpiSummary | null>(null);
@@ -22,7 +14,7 @@ export function KpisView() {
         const summaryData = await mockApi.getSummary();
         setSummary(summaryData);
       } catch (error) {
-        console.error("Error fetching KPI data", error);
+        console.error('Error fetching KPI data', error);
       } finally {
         setLoading(false);
       }
@@ -50,42 +42,15 @@ export function KpisView() {
 
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <KpiCard 
-            title="Ventas totales (Mes)" 
-            value={formatCurrency(summary.ventasTotales)} 
-            icon={<DollarSign size={22} />}
-            trend={{ value: '12%', isPositive: true }}
-          />
-          <KpiCard 
-            title="Margen de utilidad" 
-            value={`${summary.margenUtilidad}%`} 
-            icon={<TrendingUp size={22} />}
-            trend={{ value: '2.1%', isPositive: true }}
-          />
-          <KpiCard 
-            title="Stock crítico" 
-            value={summary.stockCritico} 
-            icon={<PackageMinus size={22} />}
-            trend={{ value: '4', isPositive: false }}
-          />
-          <KpiCard 
-            title="Reclamos activos" 
-            value={summary.reclamosActivos} 
-            icon={<AlertOctagon size={22} />}
-            trend={{ value: '1', isPositive: false }}
-          />
-          <KpiCard 
-            title="Ticket promedio" 
-            value={formatCurrency(summary.ticketPromedio)} 
-            icon={<Receipt size={22} />}
-            trend={{ value: '5%', isPositive: true }}
-          />
-          <KpiCard 
-            title="Satisfacción cliente" 
-            value={`${summary.satisfaccionCliente}%`} 
-            icon={<Smile size={22} />}
-            trend={{ value: '1%', isPositive: true }}
-          />
+          {kpiCardStrategies.map((strategy) => (
+            <KpiCard
+              key={strategy.title}
+              title={strategy.title}
+              value={strategy.getValue(summary)}
+              icon={strategy.icon}
+              trend={strategy.trend}
+            />
+          ))}
         </div>
       )}
     </div>
