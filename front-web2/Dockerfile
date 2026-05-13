@@ -1,7 +1,7 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-ARG VITE_USERS_API_URL=http://localhost:8081/api
+ARG VITE_USERS_API_URL=http://localhost:8000/api/auth
 ENV VITE_USERS_API_URL=$VITE_USERS_API_URL
 
 COPY package.json package-lock.json ./

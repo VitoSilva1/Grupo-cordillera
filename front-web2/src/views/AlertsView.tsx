@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { mockApi } from '../services/mockApi';
 import type { Alert } from '../services/mockApi';
-import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
+import { alertStatusStrategies } from '../strategies/alertStatusStrategy';
 
 export function AlertsView() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -13,7 +13,7 @@ export function AlertsView() {
         const alertsData = await mockApi.getAlerts();
         setAlerts(alertsData);
       } catch (error) {
-        console.error("Error fetching alerts data", error);
+        console.error('Error fetching alerts data', error);
       } finally {
         setLoading(false);
       }
@@ -59,25 +59,24 @@ export function AlertsView() {
                   </td>
                 </tr>
               ) : (
-                alerts.map((alert) => (
-                  <tr key={alert.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td className="py-4 px-6 font-medium text-slate-400">#{alert.id}</td>
-                    <td className="py-4 px-6 font-medium text-slate-800">{alert.kpi}</td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-                        ${alert.status === 'Crítico' ? 'bg-rose-100 text-rose-700' : 
-                          alert.status === 'Advertencia' ? 'bg-amber-100 text-amber-700' : 
-                          'bg-blue-100 text-blue-700'}`}>
-                        {alert.status === 'Crítico' && <AlertOctagon size={12} />}
-                        {alert.status === 'Advertencia' && <AlertTriangle size={12} />}
-                        {alert.status === 'Informativo' && <Info size={12} />}
-                        {alert.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-slate-500 whitespace-nowrap">{alert.date}</td>
-                    <td className="py-4 px-6 text-slate-600 min-w-[250px]">{alert.description}</td>
-                  </tr>
-                ))
+                alerts.map((alert) => {
+                  const statusStrategy = alertStatusStrategies[alert.status];
+
+                  return (
+                    <tr key={alert.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                      <td className="py-4 px-6 font-medium text-slate-400">#{alert.id}</td>
+                      <td className="py-4 px-6 font-medium text-slate-800">{alert.kpi}</td>
+                      <td className="py-4 px-6">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStrategy.className}`}>
+                          {statusStrategy.icon}
+                          {alert.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-slate-500 whitespace-nowrap">{alert.date}</td>
+                      <td className="py-4 px-6 text-slate-600 min-w-[250px]">{alert.description}</td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
