@@ -6,35 +6,20 @@ import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
 import type { UserProfile } from './types/user';
+import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session';
 import { useState } from 'react';
 import './App.css';
-
-const SESSION_USER_KEY = 'grupo-cordillera-user';
-
-const getSessionUser = (): UserProfile | null => {
-  const storedUser = sessionStorage.getItem(SESSION_USER_KEY);
-  if (!storedUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedUser) as UserProfile;
-  } catch {
-    sessionStorage.removeItem(SESSION_USER_KEY);
-    return null;
-  }
-};
 
 function App() {
   const [user, setUser] = useState<UserProfile | null>(() => getSessionUser());
 
   const handleLogin = (authenticatedUser: UserProfile) => {
-    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(authenticatedUser));
+    saveSessionUser(authenticatedUser);
     setUser(authenticatedUser);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_USER_KEY);
+    clearSessionUser();
     setUser(null);
   };
 

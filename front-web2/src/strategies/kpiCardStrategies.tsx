@@ -8,14 +8,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { KpiSummary } from '../services/mockApi';
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+import { formatCurrency } from '../utils/formatters';
 
 interface KpiCardStrategy {
   title: string;
