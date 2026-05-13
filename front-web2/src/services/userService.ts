@@ -1,6 +1,6 @@
 import type { UserProfile } from '../types/user';
 
-const API_URL = import.meta.env.VITE_USERS_API_URL;
+const API_URL = import.meta.env.VITE_USERS_API_URL || 'http://localhost:8000/api/auth';
 
 export const userService = {
     getCurrentUser: async (): Promise<UserProfile> => {

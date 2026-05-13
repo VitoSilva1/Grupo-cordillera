@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { mockApi } from '../services/mockApi';
-import type { KpiSummary } from '../services/mockApi';
+import { kpiService } from '../services/kpiService';
+import type { KpiSummary } from '../services/kpiService';
 import { KpiCard } from '../components/KpiCard';
 import { DollarSign, TrendingUp, PackageMinus, AlertOctagon, Receipt, Smile } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export function KpisView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const summaryData = await mockApi.getSummary();
+        const summaryData = await kpiService.getSummary();
         setSummary(summaryData);
       } catch (error) {
         console.error("Error fetching KPI data", error);

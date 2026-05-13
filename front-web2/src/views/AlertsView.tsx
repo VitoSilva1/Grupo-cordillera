@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { mockApi } from '../services/mockApi';
-import type { Alert } from '../services/mockApi';
+import { kpiService } from '../services/kpiService';
+import type { Alert } from '../services/kpiService';
 import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
 
 export function AlertsView() {
@@ -10,7 +10,7 @@ export function AlertsView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const alertsData = await mockApi.getAlerts();
+        const alertsData = await kpiService.getAlerts();
         setAlerts(alertsData);
       } catch (error) {
         console.error("Error fetching alerts data", error);
