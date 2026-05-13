@@ -1,6 +1,6 @@
 import type { UserProfile } from '../types/user';
 
-const AUTH_API_URL = import.meta.env.VITE_USERS_API_URL;
+const AUTH_API_URL = (import.meta.env.VITE_USERS_API_URL || 'http://localhost:8000/api') as string;
 
 interface LoginResponse {
   message?: string;
