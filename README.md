@@ -67,8 +67,8 @@ Grupo-cordillera/
 
 - **Frontend**: React, Create React App
 - **Backend BFF**: Node.js, Express, CORS
-- **Autenticación**: Spring Boot, Java 17
-- **KPIs**: Spring Boot, Java 17
+- **Autenticación**: Spring Boot, Java 25 LTS
+- **KPIs**: Spring Boot, Java 25 LTS
 - **Construcción**: Maven para servicios Java
 - **Gestión de dependencias**: npm para frontend y BFF
 - **Comunicación**: APIs REST JSON
