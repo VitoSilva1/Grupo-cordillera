@@ -1,197 +1,225 @@
-# Grupo Cordillera
+# Grupo Cordillera — Monorepo
 
-## Descripción general
-
-`Grupo Cordillera` es un monorepo de arquitectura de microservicios diseñado para soportar una aplicación corporativa con frontend, autenticación, BFF y servicio de KPIs. Cada servicio se implementa de forma independiente dentro del mismo repositorio, lo que facilita el desarrollo paralelo, las pruebas aisladas y el despliegue modular.
-
-Este proyecto está orientado a una solución enterprise ligera donde el frontend consume APIs a través de un backend for frontend (BFF) y la autenticación es gestionada por un servicio especializado.
-
-## Arquitectura del sistema
-
-La arquitectura consta de cuatro servicios principales:
-
-- `front-web`: Aplicación React que provee la interfaz de usuario.
-- `bff-service`: Backend For Frontend que actúa como intermediario entre el frontend y los servicios backend.
-- `auth-service`: Servicio de autenticación y gestión de usuarios.
-- `kpis-service`: Servicio de métricas y KPIs para la información de negocio.
-
-El flujo de comunicación general es:
-
-1. El usuario interactúa con `front-web`.
-2. El frontend realiza solicitudes al `bff-service`.
-3. El `bff-service` reenvía las peticiones a `auth-service` o `kpis-service` según corresponda.
-4. Los datos se envían de vuelta al frontend a través del BFF.
-
-## Estructura del repositorio
-
-```text
-Grupo-cordillera/
-├── auth-service/
-│   ├── pom.xml
-│   ├── src/
-│   │   ├── main/java/com/grupocordillera/authService/
-│   │   │   ├── AuthServiceApplication.java
-│   │   │   ├── controller/
-│   │   │   ├── dto/
-│   │   │   ├── model/
-│   │   │   ├── repository/
-│   │   │   └── service/
-│   │   └── resources/
-│   │       └── application.properties
-│   └── test/
-├── bff-service/
-│   ├── package.json
-│   ├── src/
-│   │   └── index.js
-│   └── .env
-├── front-web/
-│   ├── package.json
-│   ├── public/
-│   └── src/
-│       ├── App.js
-│       ├── Login.jsx
-│       └── ...
-├── kpis-service/
-│   ├── pom.xml
-│   ├── src/
-│   │   ├── main/java/com/grupocordillera/kpis/
-│   │   └── resources/
-│   └── test/
-└── README.md
-```
-
-<img src="front-web/assets/diagrama.png" width="950"/>
-
-
-## Tecnologías utilizadas
-
-- **Frontend**: React, Create React App
-- **Backend BFF**: Node.js, Express, CORS
-- **Autenticación**: Spring Boot, Java 17
-- **KPIs**: Spring Boot, Java 17
-- **Construcción**: Maven para servicios Java
-- **Gestión de dependencias**: npm para frontend y BFF
-- **Comunicación**: APIs REST JSON
-
-## Instalación paso a paso
-
-1. Clonar el repositorio:
-
-```bash
-git clone https://tu-repositorio/Grupo-cordillera.git
-cd Grupo-cordillera
-```
-
-2. Instalar dependencias del frontend:
-
-```bash
-cd front-web
-npm install
-```
-
-3. Instalar dependencias del BFF:
-
-```bash
-cd ../bff-service
-npm install
-```
-
-4. Instalar dependencias de los servicios Java:
-
-```bash
-cd ../auth-service
-mvn clean install
-
-cd ../kpis-service
-mvn clean install
-```
-
-## Cómo ejecutar el frontend
-
-Desde la carpeta `front-web`:
-
-```bash
-cd front-web
-npm start
-```
-
-Luego abrir en el navegador:
-
-```text
-http://localhost:3000
-```
-
-## Cómo se comunican los servicios
-
-El `front-web` no llama directamente a los servicios backend. En su lugar, usa el `bff-service` como intermediario:
-
-- `front-web` → `bff-service` (`http://localhost:8000`)
-- `bff-service` → `auth-service` / `kpis-service`
-
-Esto permite centralizar rutas, políticas de CORS, agregación de respuestas y seguridad en un solo punto.
-
-## Autenticación
-
-El `auth-service` gestiona el login y el registro de usuarios. En este proyecto, se utiliza un repositorio en memoria para datos mock, ya que no existe una base de datos real implementada.
-
-Rutas principales del `auth-service`:
-
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/auth/health`
-- `GET /api/auth/users/me`
-
-El componente `Login.jsx` del frontend envía las credenciales al BFF y éste las reenvía al `auth-service`.
-
-## KPIs
-
-El `kpis-service` está diseñado para exponer métricas y datos de negocio a través de APIs REST. Este servicio puede entregar información agregada como ventas, rendimiento de sucursales, indicadores de canales y alertas.
-
-Rutas típicas:
-
-- `GET /api/kpis/summary`
-- `GET /api/kpis/sales/monthly`
-- `GET /api/kpis/branches/performance`
-- `GET /api/kpis/channels`
-- `GET /api/kpis/alerts`
-
-## Buenas prácticas del proyecto
-
-- Utilizar flujo de Git basado en ramas: `main`, `develop`, `feature/*`
-- Ejemplo de rama: `feature/login`
-- Realizar commits claros y atómicos
-- Mantener la lógica de cada servicio aislada
-- Documentar cambios relevantes en el README y en los commits
-
-## Variables de entorno
-
-Ejemplo de `.env` para `bff-service`:
-
-```env
-PORT=8000
-AUTH_API_URL=http://localhost:8080/api/auth
-KPIS_API_URL=http://localhost:8081/api/kpis
-ALLOWED_ORIGINS=http://localhost:3000
-```
-
-Ejemplo de `.env` para `front-web` (opcional si se añaden variables):
-
-```env
-REACT_APP_API_BASE_URL=http://localhost:8000/api
-```
-
-## Equipo / Autor
-
-- Nombre: Solange Argomedo - Jose Astorga - Victor Silva
-
-
-## Notas finales y consideraciones
-
-- Este repositorio está construido como un monorepo de servicios independientes para facilitar pruebas y despliegues paralelos.
-- En un entorno productivo, se recomienda agregar una base de datos persistente, manejo de tokens JWT, seguridad de CORS y validaciones adicionales.
-- Si se requiere, se puede extender el BFF para proveer caches, autenticación centralizada y versionado de API.
-- Mantener documentadas las dependencias y versiones en cada servicio garantiza mayor robustez.
+Sistema de panel de KPIs empresariales construido con una arquitectura de microservicios. Permite a los usuarios autenticarse y visualizar indicadores de negocio como ventas, márgenes, desempeño por sucursal, canales de venta y alertas operacionales.
 
 ---
 
-`Grupo Cordillera` es una base sólida para continuar la evolución hacia una plataforma empresarial completa con frontend web, BFF, autenticación y métricas centralizadas.
+## Arquitectura general
+
+```
+Navegador
+    │
+    ▼
+front-web2  (React + Vite + TypeScript)  :5173
+    │
+    ▼ HTTP REST
+bff-service  (Node.js + Express)         :8000
+    ├──► auth-service  (Spring Boot)     :9080  ──► auth-db  (PostgreSQL :5433)
+    └──► kpis-service  (Spring Boot)     :9081  ──► kpis-db  (PostgreSQL :5434)
+```
+
+- El navegador solo habla con el **BFF** (`localhost:8000`).
+- El **BFF** actúa como proxy y agrega datos hacia los microservicios internos.
+- Cada microservicio Java tiene su **propia base de datos PostgreSQL** con migraciones independientes gestionadas por Flyway.
+
+---
+
+## Servicios del monorepo
+
+| Directorio     | Tecnología                      | Descripción                                        |
+|----------------|---------------------------------|----------------------------------------------------|
+| `front-web2/`  | React 19, TypeScript 6, Vite 8  | Panel web principal con login y dashboard de KPIs  |
+| `bff-service/` | Node.js, Express 5, ESM         | Proxy y agregador entre frontend y microservicios  |
+| `auth-service/`| Java 25, Spring Boot 4          | Autenticación, registro y gestión de usuarios      |
+| `kpis-service/`| Java 25, Spring Boot 4          | Indicadores de negocio y datos del dashboard       |
+| `front-web/`   | React (CRA)                     | Frontend legacy (no activo en Docker)              |
+
+---
+
+## Requisitos previos
+
+- **Docker** y **Docker Compose** (recomendado para levantar todo el stack)
+- **Java 25** y **Maven 3.9+** (solo si ejecutas los servicios Java localmente)
+- **Node.js 20+** y **npm** (solo si ejecutas bff o front localmente)
+
+---
+
+## Levantar el stack completo con Docker
+
+Desde la raíz del repositorio:
+
+```bash
+docker compose up --build
+```
+
+En segundo plano:
+
+```bash
+docker compose up -d --build
+```
+
+Ver estado de los contenedores:
+
+```bash
+docker compose ps
+```
+
+Ver logs de un servicio específico:
+
+```bash
+docker compose logs -f bff-service
+```
+
+Detener y eliminar contenedores:
+
+```bash
+docker compose down
+```
+
+Eliminar también volúmenes (borra los datos de las bases):
+
+```bash
+docker compose down -v
+```
+
+### Orden de arranque
+
+Docker Compose respeta las dependencias mediante `healthcheck`:
+
+1. `auth-db` y `kpis-db` (PostgreSQL) arrancan primero.
+2. `auth-service` y `kpis-service` esperan a que sus bases de datos estén saludables.
+3. `bff-service` espera a que ambos microservicios Java estén saludables.
+4. `front-web2` espera a que el BFF esté saludable.
+
+---
+
+## Puertos expuestos
+
+| Servicio       | URL local                  | Puerto interno |
+|----------------|----------------------------|----------------|
+| Frontend       | http://localhost:5173      | 80             |
+| BFF            | http://localhost:8000      | 8000           |
+| Auth API       | http://localhost:9080      | 8080           |
+| KPIs API       | http://localhost:9081      | 8081           |
+| Auth DB        | localhost:5433             | 5432           |
+| KPIs DB        | localhost:5434             | 5432           |
+
+---
+
+## Endpoints principales
+
+### Auth Service (`/api/auth`)
+
+| Método | Ruta               | Descripción                          |
+|--------|--------------------|--------------------------------------|
+| GET    | `/health`          | Health check del servicio            |
+| POST   | `/login`           | Autenticar usuario (username/email)  |
+| POST   | `/register`        | Registrar nuevo usuario              |
+| GET    | `/users/me`        | Perfil del usuario actual            |
+| GET    | `/users`           | Listar todos los usuarios            |
+
+### KPIs Service (`/api/kpis`)
+
+| Método | Ruta                    | Descripción                        |
+|--------|-------------------------|------------------------------------|
+| GET    | `/health`               | Health check del servicio          |
+| GET    | `/summary`              | Resumen general de KPIs            |
+| GET    | `/sales/monthly`        | Ventas mensuales                   |
+| GET    | `/branches/performance` | Desempeño por sucursal             |
+| GET    | `/channels`             | Ventas por canal                   |
+| GET    | `/alerts`               | Alertas operacionales activas      |
+| GET    | `/{type}`               | KPI por tipo (enum `KpiType`)      |
+
+### BFF Service
+
+| Método | Ruta              | Descripción                                      |
+|--------|-------------------|--------------------------------------------------|
+| GET    | `/health`         | Health check del BFF                             |
+| GET    | `/api/dashboard`  | Agrega todos los KPIs en una sola respuesta      |
+| ANY    | `/api/auth/*`     | Proxy hacia auth-service                         |
+| ANY    | `/api/kpis/*`     | Proxy hacia kpis-service                         |
+
+---
+
+## Migraciones de base de datos
+
+Cada microservicio administra sus propias migraciones con **Flyway**. Los scripts se ejecutan en orden al arrancar el servicio y el historial queda registrado en la tabla `flyway_schema_history` de cada base.
+
+### auth-service
+
+```
+src/main/resources/db/migration/
+├── V1__create_users_table.sql                    → Crea la tabla users
+├── V2__seed_default_users.sql                    → Inserta usuarios de prueba
+└── V3__normalize_users_seed_and_email_index.sql  → Normaliza datos e índice de email
+```
+
+### kpis-service
+
+```
+src/main/resources/db/migration/
+├── V1__create_kpis_schema.sql     → Crea tablas: kpi_summary, monthly_sales, branch_performance, sales_channels, alerts
+├── V2__seed_kpis_data.sql         → Inserta datos iniciales de KPIs
+└── V3__upsert_kpis_seed_data.sql  → Actualiza/inserta datos de seed
+```
+
+---
+
+## Variables de entorno
+
+### auth-service
+
+| Variable                  | Valor por defecto                              |
+|---------------------------|------------------------------------------------|
+| `SPRING_DATASOURCE_URL`   | `jdbc:postgresql://localhost:5433/auth_db`     |
+| `SPRING_DATASOURCE_USERNAME` | `auth_user`                                 |
+| `SPRING_DATASOURCE_PASSWORD` | `auth_pass`                                 |
+
+### kpis-service
+
+| Variable                  | Valor por defecto                              |
+|---------------------------|------------------------------------------------|
+| `SPRING_DATASOURCE_URL`   | `jdbc:postgresql://localhost:5434/kpis_db`     |
+| `SPRING_DATASOURCE_USERNAME` | `kpis_user`                                 |
+| `SPRING_DATASOURCE_PASSWORD` | `kpis_pass`                                 |
+
+### bff-service
+
+| Variable           | Valor por defecto                        |
+|--------------------|------------------------------------------|
+| `PORT`             | `8000`                                   |
+| `AUTH_API_URL`     | `http://localhost:8080/api/auth`         |
+| `KPIS_API_URL`     | `http://localhost:8081/api/kpis`         |
+| `ALLOWED_ORIGINS`  | `http://localhost:5173`                  |
+
+### front-web2
+
+| Variable              | Valor por defecto                   |
+|-----------------------|-------------------------------------|
+| `VITE_USERS_API_URL`  | `http://localhost:8000/api/auth`    |
+
+---
+
+## Estructura del monorepo
+
+```
+Grupo-cordillera/
+├── docker-compose.yml      ← Orquestación completa del stack
+├── .gitignore
+├── README.md
+├── front-web2/             ← Frontend principal (React + Vite + TypeScript)
+├── bff-service/            ← Backend For Frontend (Node.js + Express)
+├── auth-service/           ← Microservicio de autenticación (Spring Boot)
+├── kpis-service/           ← Microservicio de KPIs (Spring Boot)
+└── front-web/              ← Frontend legacy (React CRA, no activo)
+```
+
+---
+
+## Convenciones del proyecto
+
+- **Base de datos por microservicio**: cada servicio Java tiene su propio contenedor PostgreSQL y nunca comparte base con otro.
+- **BFF como único punto de entrada**: el frontend no llama directamente a los microservicios Java.
+- **Migraciones versionadas**: los scripts Flyway siguen el formato `V{N}__{descripcion}.sql` y nunca se modifican una vez aplicados.
+- **Health checks**: todos los servicios exponen un endpoint `/health` que Docker Compose usa para determinar el orden de arranque.
+- **Sin autenticación JWT por ahora**: el login devuelve datos del usuario directamente; la sesión se maneja en el estado del frontend.

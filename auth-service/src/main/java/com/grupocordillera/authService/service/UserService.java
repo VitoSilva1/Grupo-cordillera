@@ -3,11 +3,10 @@ package com.grupocordillera.authService.service;
 import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.InMemoryUserRepository;
+import com.grupocordillera.authService.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,10 +15,10 @@ public class UserService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of("Gerente", "Supervisor", "Vendedor");
 
-    private final InMemoryUserRepository userRepository;
+    private final UserRepository userRepository;
     
 
-    public UserService(InMemoryUserRepository userRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -49,11 +48,22 @@ public class UserService {
 
         String login = userDto.getUsername().trim();
         Optional<User> user = userRepository.findByUsername(login)
-                .or(() -> userRepository.findByEmail(login));
+                .or(() -> userRepository.findByEmailIgnoreCase(login));
 
         return user
                 .map(foundUser -> foundUser.getPassword().equals(userDto.getPassword()))
                 .orElse(false);
+    }
+
+    public Optional<User> authenticateAndGetUser(UserDto userDto) {
+        validateLoginDto(userDto);
+
+        String login = userDto.getUsername().trim();
+        Optional<User> user = userRepository.findByUsername(login)
+                .or(() -> userRepository.findByEmailIgnoreCase(login));
+
+        return user
+                .filter(foundUser -> foundUser.getPassword().equals(userDto.getPassword()));
     }
 
     public List<User> findAll() {
@@ -81,36 +91,6 @@ public class UserService {
                 "guest"
         );
     }
-
-    public UserProfileDto getMockUserProfile(String role) {
-        String normalizedRole = role == null ? "" : role.trim().toLowerCase(Locale.ROOT);
-
-        return switch (normalizedRole) {
-            case "gerente" -> new UserProfileDto(
-                    "mock-gerente",
-                    "Carolina Muñoz",
-                    "Gerente",
-                    "carolina.munoz@grupocordillera.cl",
-                    "cmunoz"
-            );
-            case "supervisor" -> new UserProfileDto(
-                    "mock-supervisor",
-                    "Felipe Rojas",
-                    "Supervisor",
-                    "felipe.rojas@grupocordillera.cl",
-                    "frojas"
-            );
-            case "vendedor" -> new UserProfileDto(
-                    "mock-vendedor",
-                    "Daniela Soto",
-                    "Vendedor",
-                    "daniela.soto@grupocordillera.cl",
-                    "dsoto"
-            );
-            default -> throw new IllegalArgumentException("El role debe ser Gerente, Supervisor o Vendedor");
-        };
-    }
-
     private void validateRegisterDto(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
