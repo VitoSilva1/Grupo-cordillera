@@ -1,8 +1,411 @@
-# Auth Service - Grupo Cordillera
+# auth-service — Grupo Cordillera
 
-## 1. Descripcion general
+Microservicio de autenticación y gestión de usuarios del sistema Grupo Cordillera. Construido con **Java 25** y **Spring Boot 4**. Expone una API REST bajo el prefijo `/api/auth` que permite login, registro de usuarios y consulta de perfiles.
 
-`auth-service` es el microservicio encargado de la autenticacion y gestion basica de usuarios del sistema Grupo Cordillera.
+---
+
+## Índice
+
+1. [Descripción general](#1-descripción-general)
+2. [Stack tecnológico](#2-stack-tecnológico)
+3. [Estructura del proyecto](#3-estructura-del-proyecto)
+4. [Configuración](#4-configuración)
+5. [Base de datos y migraciones](#5-base-de-datos-y-migraciones)
+6. [Componentes principales](#6-componentes-principales)
+7. [Endpoints](#7-endpoints)
+8. [Usuarios de prueba](#8-usuarios-de-prueba)
+9. [Tests](#9-tests)
+10. [Ejecución local sin Docker](#10-ejecución-local-sin-docker)
+11. [Dockerfile](#11-dockerfile)
+12. [Rol en el monorepo](#12-rol-en-el-monorepo)
+
+---
+
+## 1. Descripción general
+
+`auth-service` es el microservicio encargado de la autenticación y gestión básica de usuarios. En el flujo de la aplicación:
+
+1. El usuario ingresa credenciales en `front-web2`.
+2. El frontend hace `POST /api/auth/login` al **BFF** (`bff-service`).
+3. El BFF reenvía la petición a `auth-service` en la red interna de Docker.
+4. `auth-service` valida las credenciales contra la base de datos PostgreSQL y responde con los datos del usuario.
+
+El servicio **no emite tokens JWT**. La sesión se maneja en el estado del frontend.
+
+---
+
+## 2. Stack tecnológico
+
+| Componente              | Versión  | Uso                                                     |
+|-------------------------|----------|---------------------------------------------------------|
+| Java                    | 25 LTS   | Lenguaje del servicio                                   |
+| Spring Boot             | 4.0.6    | Framework principal, autoconfiguracion, servidor embebido |
+| Spring Web MVC          | —        | API REST, `@RestController`, `ResponseEntity`           |
+| Spring Data JPA         | —        | Persistencia con Hibernate                              |
+| Flyway                  | —        | Migraciones de base de datos                            |
+| PostgreSQL (JDBC)       | —        | Base de datos relacional                                |
+| JUnit 5 + Mockito       | —        | Pruebas unitarias                                       |
+| Maven                   | 3.9+     | Gestor de dependencias y build                          |
+| Docker (multi-stage)    | —        | Imagen de producción                                    |
+
+---
+
+## 3. Estructura del proyecto
+
+```
+auth-service/
+├── Dockerfile
+├── pom.xml
+├── README.md
+└── src/
+    ├── main/
+    │   ├── java/com/grupocordillera/authService/
+    │   │   ├── AuthServiceApplication.java      ← Punto de entrada Spring Boot
+    │   │   ├── config/
+    │   │   │   └── WebConfig.java               ← Configuración CORS
+    │   │   ├── controller/
+    │   │   │   └── UserController.java           ← Endpoints REST /api/auth
+    │   │   ├── dto/
+    │   │   │   ├── UserDto.java                  ← DTO de entrada (login/registro)
+    │   │   │   └── UserProfileDto.java           ← DTO de salida (perfil)
+    │   │   ├── model/
+    │   │   │   └── User.java                     ← Entidad de dominio
+    │   │   ├── repository/
+    │   │   │   ├── UserRepository.java           ← Interfaz del repositorio
+    │   │   │   └── InMemoryUserRepository.java   ← Implementación en memoria
+    │   │   └── service/
+    │   │       └── UserService.java              ← Lógica de negocio
+    │   └── resources/
+    │       ├── application.properties
+    │       └── db/migration/
+    │           ├── V1__create_users_table.sql
+    │           ├── V2__seed_default_users.sql
+    │           └── V3__normalize_users_seed_and_email_index.sql
+    └── test/
+        └── java/com/grupocordillera/authService/
+            ├── controller/
+            │   └── UserControllerTest.java
+            └── service/
+                └── UserServiceTest.java
+```
+
+---
+
+## 4. Configuración
+
+Archivo: `src/main/resources/application.properties`
+
+```properties
+spring.application.name=auth-service
+server.port=8080
+
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/auth_db}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:auth_user}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:auth_pass}
+
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.open-in-view=false
+
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+```
+
+### Variables de entorno
+
+| Variable                    | Descripción                        | Valor por defecto                          |
+|-----------------------------|------------------------------------|--------------------------------------------|
+| `SPRING_DATASOURCE_URL`     | URL JDBC de la base de datos       | `jdbc:postgresql://localhost:5433/auth_db` |
+| `SPRING_DATASOURCE_USERNAME`| Usuario de la base de datos        | `auth_user`                                |
+| `SPRING_DATASOURCE_PASSWORD`| Contraseña de la base de datos     | `auth_pass`                                |
+
+Con Docker Compose estas variables se inyectan automáticamente.
+
+### Puertos
+
+| Contexto           | Puerto        |
+|--------------------|---------------|
+| Ejecución directa  | `localhost:8080` |
+| Docker Compose     | `localhost:9080` (mapeado de `9080:8080`) |
+
+---
+
+## 5. Base de datos y migraciones
+
+- **Motor**: PostgreSQL 16
+- **Base de datos**: `auth_db`
+- **Usuario**: `auth_user`
+- **Contenedor Docker**: `grupo-cordillera-auth-db` (`puerto host: 5433`)
+
+Flyway gestiona el esquema. Los scripts se ubican en `src/main/resources/db/migration/` y se ejecutan en orden al arrancar el servicio.
+
+| Script                                           | Descripción                                  |
+|--------------------------------------------------|----------------------------------------------|
+| `V1__create_users_table.sql`                     | Crea la tabla `users`                        |
+| `V2__seed_default_users.sql`                     | Inserta usuarios de prueba iniciales         |
+| `V3__normalize_users_seed_and_email_index.sql`   | Normaliza datos y agrega índice sobre email  |
+
+> **Importante**: nunca modifiques un script ya aplicado. Siempre crea una nueva migración con el siguiente número de versión.
+
+---
+
+## 6. Componentes principales
+
+### `AuthServiceApplication`
+
+Clase principal con el método `main`. Activa el escaneo de componentes de Spring Boot mediante `@SpringBootApplication`.
+
+### `WebConfig`
+
+Configura CORS para permitir que el frontend llame directamente al servicio en desarrollo:
+
+```java
+registry.addMapping("/api/**")
+        .allowedOrigins("http://localhost:5173")
+        .allowedMethods("GET", "POST");
+```
+
+En producción con Docker, el frontend llama al BFF y este ya tiene su propia configuración CORS.
+
+### `UserController`
+
+Controlador REST bajo `/api/auth`. Responsabilidades:
+
+- Recibir peticiones HTTP y deserializar el body a `UserDto`.
+- Delegar toda la lógica a `UserService`.
+- Retornar respuestas `ResponseEntity` con los códigos HTTP correctos.
+- Manejar `IllegalArgumentException` y convertirlas en respuestas `400 Bad Request`.
+
+### `UserService`
+
+Capa de lógica de negocio. Responsabilidades:
+
+- **Registro**: validar campos, normalizar email a minúsculas, verificar unicidad de username y email, guardar el usuario.
+- **Autenticación**: buscar por username o email (el campo `username` del request puede contener cualquiera de los dos), comparar contraseñas.
+- **Roles permitidos**: `Gerente`, `Supervisor`, `Vendedor`. Cualquier otro valor es rechazado con error `400`.
+- **Perfil**: retornar el primer usuario del repositorio como perfil actual (implementación simplificada).
+
+### `InMemoryUserRepository`
+
+Implementación del repositorio usando un `ConcurrentHashMap` en memoria. Los datos **no persisten** entre reinicios. Se usa solo para desarrollo y demo.
+
+### `UserDto` (DTO de entrada)
+
+```java
+String email;
+String username;
+String password;
+String role;
+```
+
+En login se usan `username` y `password`. En registro se usan los cuatro campos.
+
+### `UserProfileDto` (DTO de salida)
+
+```java
+record UserProfileDto(String id, String name, String role, String email, String username)
+```
+
+Coincide con el tipo `UserProfile` esperado por `front-web2`.
+
+---
+
+## 7. Endpoints
+
+Base URL: `http://localhost:9080/api/auth` (Docker) / `http://localhost:8080/api/auth` (local)
+
+---
+
+### `GET /health`
+
+Verifica que el servicio esté activo.
+
+**Respuesta `200 OK`**:
+```json
+{ "status": "UP", "service": "auth-service" }
+```
+
+---
+
+### `POST /login`
+
+Autentica un usuario. El campo `username` acepta el nombre de usuario o el email.
+
+**Request**:
+```json
+{ "username": "gerente", "password": "1234" }
+```
+
+**Respuesta `200 OK`**:
+```json
+{
+  "message": "Autenticacion exitosa",
+  "username": "gerente",
+  "email": "gerente@cordillera.cl",
+  "role": "Gerente"
+}
+```
+
+**Respuesta `401 Unauthorized`**:
+```json
+{ "error": "Credenciales invalidas" }
+```
+
+**Respuesta `400 Bad Request`**:
+```json
+{ "error": "El username o email es obligatorio" }
+```
+
+---
+
+### `POST /register`
+
+Registra un nuevo usuario.
+
+**Request**:
+```json
+{
+  "email": "nuevo@cordillera.cl",
+  "username": "nuevo",
+  "password": "segura123",
+  "role": "Vendedor"
+}
+```
+
+**Respuesta `201 Created`**:
+```json
+{
+  "message": "Usuario registrado correctamente",
+  "email": "nuevo@cordillera.cl",
+  "username": "nuevo",
+  "role": "Vendedor"
+}
+```
+
+**Errores `400 Bad Request`** posibles:
+- `El cuerpo de la solicitud es obligatorio`
+- `El email es obligatorio` / `El email no es valido`
+- `El username es obligatorio`
+- `La password es obligatoria`
+- `El role es obligatorio` / `El role debe ser Gerente, Supervisor o Vendedor`
+- `El usuario ya existe`
+- `El email ya existe`
+
+---
+
+### `GET /users/me`
+
+Devuelve el perfil del primer usuario registrado (implementación simplificada).
+
+**Respuesta `200 OK`**:
+```json
+{
+  "id": "gerente",
+  "name": "gerente",
+  "role": "Gerente",
+  "email": "gerente@cordillera.cl",
+  "username": "gerente"
+}
+```
+
+---
+
+### `GET /users`
+
+Lista todos los usuarios registrados.
+
+**Respuesta `200 OK`**:
+```json
+[
+  { "username": "gerente", "email": "gerente@cordillera.cl", "role": "Gerente" },
+  { "username": "supervisor", "email": "supervisor@cordillera.cl", "role": "Supervisor" }
+]
+```
+
+---
+
+## 8. Usuarios de prueba
+
+Los siguientes usuarios son insertados por las migraciones de Flyway:
+
+| Username     | Email                          | Password | Rol         |
+|--------------|--------------------------------|----------|-------------|
+| `gerente`    | `gerente@cordillera.cl`        | `1234`   | Gerente     |
+| `supervisor` | `supervisor@cordillera.cl`     | `1234`   | Supervisor  |
+| `vendedor`   | `vendedor@cordillera.cl`       | `1234`   | Vendedor    |
+
+---
+
+## 9. Tests
+
+Los tests se ubican en `src/test/java/com/grupocordillera/authService/`.
+
+| Clase                  | Qué prueba                                                        |
+|------------------------|-------------------------------------------------------------------|
+| `UserServiceTest`      | Registro, validaciones, autenticación por username y por email    |
+| `UserControllerTest`   | Respuestas HTTP correctas para cada endpoint                      |
+
+Ejecutar todos los tests:
+
+```bash
+mvn test
+```
+
+Ejecutar una clase específica:
+
+```bash
+mvn test -Dtest=UserServiceTest
+```
+
+---
+
+## 10. Ejecución local sin Docker
+
+Requisitos: Java 25, Maven 3.9+, PostgreSQL corriendo en `localhost:5433` con la base `auth_db`.
+
+```bash
+cd auth-service
+mvn spring-boot:run
+```
+
+O compilar y ejecutar el JAR:
+
+```bash
+mvn clean package -DskipTests
+java -jar target/auth-service-*.jar
+```
+
+Con variables de entorno personalizadas:
+
+```bash
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5433/auth_db \
+SPRING_DATASOURCE_USERNAME=auth_user \
+SPRING_DATASOURCE_PASSWORD=auth_pass \
+mvn spring-boot:run
+```
+
+---
+
+## 11. Dockerfile
+
+El Dockerfile usa **multi-stage build** para mantener la imagen de producción liviana:
+
+1. **Stage build** (`maven:3.9.11-eclipse-temurin-25`): compila el proyecto y genera el JAR.
+2. **Stage runtime** (`eclipse-temurin:25-jre`): copia solo el JAR y lo ejecuta.
+
+Esto reduce el tamaño final de la imagen al no incluir Maven ni el código fuente.
+
+---
+
+## 12. Rol en el monorepo
+
+```
+front-web2  →  bff-service  →  auth-service  →  auth-db (PostgreSQL)
+```
+
+- `auth-service` **solo recibe peticiones del BFF**, nunca directamente del frontend en producción.
+- Comparte el `docker-compose.yml` raíz con `kpis-service`, `bff-service` y `front-web2`.
+- Su base de datos `auth-db` es **independiente** de `kpis-db`.
+
 
 Esta construido con Java 25 LTS y Spring Boot 4.0.6. Expone una API REST bajo el prefijo `/api/auth`, valida credenciales, permite registrar usuarios, entrega perfiles de usuario y mantiene una lista de usuarios en memoria para fines de desarrollo y demostracion.
 
