@@ -1,26 +1,14 @@
 import type { UserProfile } from '../types/user';
 
-const AUTH_API_URL = (import.meta.env.VITE_USERS_API_URL || 'http://localhost:8000/api') as string;
+const AUTH_API_URL = import.meta.env.VITE_USERS_API_URL || 'http://localhost:8000/api/auth';
 
 interface LoginResponse {
   message?: string;
   username?: string;
+  email?: string;
+  role?: string;
   error?: string;
 }
-
-interface AuthUser {
-  username: string;
-  email?: string;
-  role: string;
-}
-
-const toUserProfile = (user: AuthUser, login: string): UserProfile => ({
-  id: user.username,
-  name: user.username,
-  role: user.role,
-  email: user.email ?? login,
-  username: user.username,
-});
 
 export const authService = {
   login: async (login: string, password: string): Promise<UserProfile> => {
@@ -41,37 +29,13 @@ export const authService = {
       throw new Error(data.error || 'Error en la autenticacion');
     }
 
-    const usersResponse = await fetch(`${AUTH_API_URL}/users`);
-    if (!usersResponse.ok) {
-      return {
-        id: data.username || login,
-        name: data.username || login,
-        role: 'Sin cargo',
-        email: login.includes('@') ? login : undefined,
-        username: data.username || login,
-      };
-    }
-
-    const users = await usersResponse.json() as AuthUser[];
-    const normalizedLogin = login.trim().toLowerCase();
-    const normalizedUsername = data.username?.trim().toLowerCase();
-
-    const matchedUser = users.find((user) =>
-      user.email?.toLowerCase() === normalizedLogin ||
-      user.username.toLowerCase() === normalizedLogin ||
-      user.username.toLowerCase() === normalizedUsername
-    );
-
-    if (!matchedUser) {
-      return {
-        id: data.username || login,
-        name: data.username || login,
-        role: 'Sin cargo',
-        email: login.includes('@') ? login : undefined,
-        username: data.username || login,
-      };
-    }
-
-    return toUserProfile(matchedUser, login);
+    const username = data.username || login;
+    return {
+      id: username,
+      name: username,
+      role: data.role || 'Sin cargo',
+      email: data.email ?? (login.includes('@') ? login : undefined),
+      username,
+    };
   },
 };

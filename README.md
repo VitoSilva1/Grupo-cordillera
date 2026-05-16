@@ -80,4 +80,4 @@ KPIs:
 
 - `auth-service` usa JPA + Flyway + PostgreSQL.
 - `kpis-service` usa JDBC + Flyway + PostgreSQL.
-- `front-web` y `front-web2` coexisten en el repo, pero en `docker-compose.yml` se usa `front-web2`.
+- El frontend activo del repositorio es `front-web2`.

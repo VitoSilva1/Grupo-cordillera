@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { mockApi } from '../services/mockApi';
-import type {
-  Alert,
-  BranchPerformance,
-  KpiSummary,
-  MonthlySales,
-  SalesChannel,
-} from '../services/mockApi';
+import { kpiService } from '../services/kpiService';
+import type { 
+  KpiSummary, 
+  MonthlySales, 
+  BranchPerformance, 
+  SalesChannel, 
+  Alert 
+} from '../services/kpiService';
 import { KpiCard } from '../components/KpiCard';
 import { alertStatusStrategies } from '../strategies/alertStatusStrategy';
 import { kpiCardStrategies } from '../strategies/kpiCardStrategies';
@@ -43,11 +43,11 @@ export function Dashboard() {
           channelsData,
           alertsData,
         ] = await Promise.all([
-          mockApi.getSummary(),
-          mockApi.getSales(),
-          mockApi.getBranchesPerformance(),
-          mockApi.getSalesByChannel(),
-          mockApi.getAlerts(),
+          kpiService.getSummary(),
+          kpiService.getSales(),
+          kpiService.getBranchesPerformance(),
+          kpiService.getSalesByChannel(),
+          kpiService.getAlerts()
         ]);
 
         setSummary(summaryData);

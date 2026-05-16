@@ -7,7 +7,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { KpiSummary } from '../services/mockApi';
+import type { KpiSummary } from '../services/kpiService';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('es-CL', {
