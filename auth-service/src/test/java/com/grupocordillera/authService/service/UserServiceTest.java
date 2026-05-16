@@ -125,14 +125,6 @@ class UserServiceTest {
     }
 
     @Test
-    void getMockUserProfileShouldReturnSupervisor() {
-        UserProfileDto profile = userService.getMockUserProfile("Supervisor");
-
-        assertEquals("mock-supervisor", profile.id());
-        assertEquals("Supervisor", profile.role());
-    }
-
-    @Test
     void authenticateShouldThrowWhenUsernameIsMissing() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,

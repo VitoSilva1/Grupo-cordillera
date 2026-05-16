@@ -103,7 +103,7 @@ services:
     ports:
       - "8000:8000"
 
-  front-web:
+  front-web2:
     build:
       context: ./front-web2
       args:
