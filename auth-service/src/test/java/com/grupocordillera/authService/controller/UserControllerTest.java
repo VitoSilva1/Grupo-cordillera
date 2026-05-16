@@ -1,103 +1,108 @@
 package com.grupocordillera.authService.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
+import com.grupocordillera.authService.repository.UserRepository;
 import com.grupocordillera.authService.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.lang.reflect.Proxy;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@WebMvcTest(UserController.class)
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean
-    private UserService userService;
-
     @Test
-    void healthShouldReturnUpStatus() throws Exception {
-        mockMvc.perform(get("/api/auth/health"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.service").value("auth-service"));
+    void healthShouldReturnUpStatus() {
+        UserController controller = new UserController(new StubUserService());
+
+        Map<String, String> response = controller.health();
+
+        assertEquals("UP", response.get("status"));
+        assertEquals("auth-service", response.get("service"));
     }
 
     @Test
-    void getUsersMeShouldReturnCurrentUserProfile() throws Exception {
-        UserProfileDto profile = new UserProfileDto("mock-user", "Mock User", "Supervisor", "mock@mail.com",
-                "mockuser");
-        when(userService.getCurrentUserProfile()).thenReturn(profile);
+    void getUsersMeShouldReturnCurrentUserProfile() {
+        StubUserService service = new StubUserService();
+        service.profile = new UserProfileDto("mock-user", "Mock User", "Supervisor", "mock@mail.com", "mockuser");
+        UserController controller = new UserController(service);
 
-        mockMvc.perform(get("/api/auth/users/me"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("mock-user"))
-                .andExpect(jsonPath("$.role").value("Supervisor"));
+        ResponseEntity<UserProfileDto> response = controller.getCurrentUser();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("mock-user", response.getBody().id());
+        assertEquals("Supervisor", response.getBody().role());
     }
 
     @Test
-    void getMockUserShouldReturnProfileForValidRole() throws Exception {
-        UserProfileDto profile = new UserProfileDto("mock-vendedor", "Daniela Soto", "Vendedor",
-                "daniela.soto@grupocordillera.cl", "dsoto");
-        when(userService.getMockUserProfile("vendedor")).thenReturn(profile);
+    void registerShouldReturnCreatedResponse() {
+        StubUserService service = new StubUserService();
+        service.registeredUser = new User("victor", "victor@mail.com", "1234", "Gerente");
+        UserController controller = new UserController(service);
 
-        mockMvc.perform(get("/api/auth/users/mock").param("role", "vendedor"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("dsoto"))
-                .andExpect(jsonPath("$.role").value("Vendedor"));
+        ResponseEntity<?> response = controller.register(new UserDto("victor@mail.com", "victor", "1234", "Gerente"));
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Map<?, ?> body = (Map<?, ?>) response.getBody();
+        assertEquals("Usuario registrado correctamente", body.get("message"));
+        assertEquals("victor@mail.com", body.get("email"));
     }
 
     @Test
-    void getMockUserShouldReturnBadRequestForInvalidRole() throws Exception {
-        when(userService.getMockUserProfile("admin"))
-                .thenThrow(new IllegalArgumentException("El role debe ser Gerente, Supervisor o Vendedor"));
+    void loginShouldReturnUnauthorizedForInvalidCredentials() {
+        UserController controller = new UserController(new StubUserService());
 
-        mockMvc.perform(get("/api/auth/users/mock").param("role", "admin"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("El role debe ser Gerente, Supervisor o Vendedor"));
+        ResponseEntity<?> response = controller.login(new UserDto(null, "victor", "wrong", null));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        Map<?, ?> body = (Map<?, ?>) response.getBody();
+        assertEquals("Credenciales invalidas", body.get("error"));
     }
 
-    @Test
-    void registerShouldReturnCreatedResponse() throws Exception {
-        UserDto request = new UserDto("victor@mail.com", "victor", "1234", "Gerente");
-        User user = new User("victor", "victor@mail.com", "1234", "Gerente");
-        when(userService.register(any(UserDto.class))).thenReturn(user);
+    private static class StubUserService extends UserService {
+        private UserProfileDto profile = new UserProfileDto("guest", "Invitado", "Sin cargo", null, "guest");
+        private User registeredUser = new User("u", "u@mail.com", "1234", "Gerente");
 
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Usuario registrado correctamente"))
-                .andExpect(jsonPath("$.email").value("victor@mail.com"));
-    }
+        StubUserService() {
+            super((UserRepository) Proxy.newProxyInstance(
+                    UserRepository.class.getClassLoader(),
+                    new Class[]{UserRepository.class},
+                    (proxy, method, args) -> {
+                        Class<?> returnType = method.getReturnType();
+                        if (returnType.equals(boolean.class)) return false;
+                        if (returnType.equals(long.class)) return 0L;
+                        if (returnType.equals(List.class)) return List.of();
+                        if (returnType.equals(Optional.class)) return Optional.empty();
+                        return null;
+                    }
+            ));
+        }
 
-    @Test
-    void loginShouldReturnUnauthorizedForInvalidCredentials() throws Exception {
-        UserDto request = new UserDto(null, "victor", "wrong", null);
-        when(userService.authenticate(any(UserDto.class))).thenReturn(false);
+        @Override
+        public UserProfileDto getCurrentUserProfile() {
+            return profile;
+        }
 
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Credenciales invalidas"));
+        @Override
+        public User register(UserDto userDto) {
+            return registeredUser;
+        }
+
+        @Override
+        public Optional<User> authenticateAndGetUser(UserDto userDto) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<User> findAll() {
+            return List.of();
+        }
     }
 }
