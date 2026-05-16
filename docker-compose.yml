@@ -18,6 +18,22 @@ services:
     volumes:
       - auth-db-data:/var/lib/postgresql/data
 
+  auth-redis:
+    image: redis:7.4-alpine
+    container_name: grupo-cordillera-auth-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    ports:
+      - "6379:6379"
+    volumes:
+      - auth-redis-data:/data
+
   kpis-db:
     image: postgres:16
     container_name: grupo-cordillera-kpis-db
@@ -46,8 +62,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
       SPRING_DATASOURCE_USERNAME: auth_user
       SPRING_DATASOURCE_PASSWORD: auth_pass
+      SPRING_DATA_REDIS_HOST: auth-redis
+      SPRING_DATA_REDIS_PORT: 6379
     depends_on:
       auth-db:
+        condition: service_healthy
+      auth-redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/auth/health >/dev/null 2>&1 || curl -fsS http://localhost:8080/api/auth/health >/dev/null"]
@@ -118,4 +138,5 @@ services:
 
 volumes:
   auth-db-data:
+  auth-redis-data:
   kpis-db-data:

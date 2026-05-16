@@ -4,6 +4,8 @@ import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
 import com.grupocordillera.authService.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @CacheEvict(cacheNames = {"users", "currentUserProfile"}, allEntries = true)
     public User register(UserDto userDto) {
         validateRegisterDto(userDto);
 
@@ -66,10 +69,12 @@ public class UserService {
                 .filter(foundUser -> foundUser.getPassword().equals(userDto.getPassword()));
     }
 
+    @Cacheable(cacheNames = "users")
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    @Cacheable(cacheNames = "currentUserProfile")
     public UserProfileDto getCurrentUserProfile() {
         Optional<User> currentUser = userRepository.findAll().stream().findFirst();
         if (currentUser.isPresent()) {
