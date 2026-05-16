@@ -7,7 +7,6 @@ import com.grupocordillera.authService.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,6 +55,17 @@ public class UserService {
                 .orElse(false);
     }
 
+    public Optional<User> authenticateAndGetUser(UserDto userDto) {
+        validateLoginDto(userDto);
+
+        String login = userDto.getUsername().trim();
+        Optional<User> user = userRepository.findByUsername(login)
+                .or(() -> userRepository.findByEmailIgnoreCase(login));
+
+        return user
+                .filter(foundUser -> foundUser.getPassword().equals(userDto.getPassword()));
+    }
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
@@ -81,36 +91,6 @@ public class UserService {
                 "guest"
         );
     }
-
-    public UserProfileDto getMockUserProfile(String role) {
-        String normalizedRole = role == null ? "" : role.trim().toLowerCase(Locale.ROOT);
-
-        return switch (normalizedRole) {
-            case "gerente" -> new UserProfileDto(
-                    "mock-gerente",
-                    "Carolina Muñoz",
-                    "Gerente",
-                    "carolina.munoz@grupocordillera.cl",
-                    "cmunoz"
-            );
-            case "supervisor" -> new UserProfileDto(
-                    "mock-supervisor",
-                    "Felipe Rojas",
-                    "Supervisor",
-                    "felipe.rojas@grupocordillera.cl",
-                    "frojas"
-            );
-            case "vendedor" -> new UserProfileDto(
-                    "mock-vendedor",
-                    "Daniela Soto",
-                    "Vendedor",
-                    "daniela.soto@grupocordillera.cl",
-                    "dsoto"
-            );
-            default -> throw new IllegalArgumentException("El role debe ser Gerente, Supervisor o Vendedor");
-        };
-    }
-
     private void validateRegisterDto(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");

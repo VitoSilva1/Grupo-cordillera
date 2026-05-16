@@ -9,7 +9,13 @@ Monorepo con arquitectura de microservicios para frontend, BFF, autenticación y
 - `auth-service`: autenticación/usuarios (Spring Boot).
 - `kpis-service`: indicadores de negocio (Spring Boot).
 
-## Arquitectura de datos (actual)
+- **Frontend**: React, Create React App
+- **Backend BFF**: Node.js, Express, CORS
+- **Autenticación**: Spring Boot, Java 25 LTS
+- **KPIs**: Spring Boot, Java 25 LTS
+- **Construcción**: Maven para servicios Java
+- **Gestión de dependencias**: npm para frontend y BFF
+- **Comunicación**: APIs REST JSON
 
 Se implementó una **base de datos por microservicio**:
 
@@ -80,4 +86,4 @@ KPIs:
 
 - `auth-service` usa JPA + Flyway + PostgreSQL.
 - `kpis-service` usa JDBC + Flyway + PostgreSQL.
-- `front-web` y `front-web2` coexisten en el repo, pero en `docker-compose.yml` se usa `front-web2`.
+- El frontend activo del repositorio es `front-web2`.

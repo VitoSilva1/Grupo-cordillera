@@ -11,6 +11,13 @@ target/
 node_modules/
 npm-debug.log*
 
+# Build output
+coverage/
+dist/
+
+# Environment
+.env
+
 # IDE
 .idea/
 *.iml
