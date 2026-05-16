@@ -1,10 +1,25 @@
 package com.grupocordillera.authService.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "users")
 public class User {
 
+    @Id
+    @Column(nullable = false, length = 100)
     private String username;
+
+    @Column(nullable = false, length = 255)
     private String password;
+
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
+
+    @Column(nullable = false, length = 30)
     private String role;
 
     public User() {
@@ -49,5 +64,4 @@ public class User {
         this.role = role;
     }
 }
-
 

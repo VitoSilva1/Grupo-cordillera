@@ -1,6 +1,6 @@
 import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { Alert } from '../services/mockApi';
+import type { Alert } from '../services/kpiService';
 
 interface AlertStatusStrategy {
   className: string;

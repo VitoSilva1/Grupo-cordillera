@@ -1,69 +1,13 @@
 # Grupo Cordillera
 
-## Descripción general
+Monorepo con arquitectura de microservicios para frontend, BFF, autenticación y KPIs.
 
-`Grupo Cordillera` es un monorepo de arquitectura de microservicios diseñado para soportar una aplicación corporativa con frontend, autenticación, BFF y servicio de KPIs. Cada servicio se implementa de forma independiente dentro del mismo repositorio, lo que facilita el desarrollo paralelo, las pruebas aisladas y el despliegue modular.
+## Servicios
 
-Este proyecto está orientado a una solución enterprise ligera donde el frontend consume APIs a través de un backend for frontend (BFF) y la autenticación es gestionada por un servicio especializado.
-
-## Arquitectura del sistema
-
-La arquitectura consta de cuatro servicios principales:
-
-- `front-web`: Aplicación React que provee la interfaz de usuario.
-- `bff-service`: Backend For Frontend que actúa como intermediario entre el frontend y los servicios backend.
-- `auth-service`: Servicio de autenticación y gestión de usuarios.
-- `kpis-service`: Servicio de métricas y KPIs para la información de negocio.
-
-El flujo de comunicación general es:
-
-1. El usuario interactúa con `front-web`.
-2. El frontend realiza solicitudes al `bff-service`.
-3. El `bff-service` reenvía las peticiones a `auth-service` o `kpis-service` según corresponda.
-4. Los datos se envían de vuelta al frontend a través del BFF.
-
-## Estructura del repositorio
-
-```text
-Grupo-cordillera/
-├── auth-service/
-│   ├── pom.xml
-│   ├── src/
-│   │   ├── main/java/com/grupocordillera/authService/
-│   │   │   ├── AuthServiceApplication.java
-│   │   │   ├── controller/
-│   │   │   ├── dto/
-│   │   │   ├── model/
-│   │   │   ├── repository/
-│   │   │   └── service/
-│   │   └── resources/
-│   │       └── application.properties
-│   └── test/
-├── bff-service/
-│   ├── package.json
-│   ├── src/
-│   │   └── index.js
-│   └── .env
-├── front-web/
-│   ├── package.json
-│   ├── public/
-│   └── src/
-│       ├── App.js
-│       ├── Login.jsx
-│       └── ...
-├── kpis-service/
-│   ├── pom.xml
-│   ├── src/
-│   │   ├── main/java/com/grupocordillera/kpis/
-│   │   └── resources/
-│   └── test/
-└── README.md
-```
-
-<img src="front-web/assets/diagrama.png" width="950"/>
-
-
-## Tecnologías utilizadas
+- `front-web2`: frontend (Vite + React).
+- `bff-service`: Backend for Frontend (Node/Express).
+- `auth-service`: autenticación/usuarios (Spring Boot).
+- `kpis-service`: indicadores de negocio (Spring Boot).
 
 - **Frontend**: React, Create React App
 - **Backend BFF**: Node.js, Express, CORS
@@ -73,81 +17,64 @@ Grupo-cordillera/
 - **Gestión de dependencias**: npm para frontend y BFF
 - **Comunicación**: APIs REST JSON
 
-## Instalación paso a paso
+Se implementó una **base de datos por microservicio**:
 
-1. Clonar el repositorio:
+- `auth-service` -> `auth-db` (`auth_db`, PostgreSQL, host port `5433`)
+- `kpis-service` -> `kpis-db` (`kpis_db`, PostgreSQL, host port `5434`)
+- `bff-service` no tiene base de datos (solo orquesta APIs)
 
-```bash
-git clone https://tu-repositorio/Grupo-cordillera.git
-cd Grupo-cordillera
-```
+## Migraciones
 
-2. Instalar dependencias del frontend:
+Cada microservicio maneja sus propias migraciones con Flyway:
 
-```bash
-cd front-web
-npm install
-```
+- `auth-service/src/main/resources/db/migration`
+  - `V1__create_users_table.sql`
+  - `V2__seed_default_users.sql`
+- `kpis-service/src/main/resources/db/migration`
+  - `V1__create_kpis_schema.sql`
+  - `V2__seed_kpis_data.sql`
 
-3. Instalar dependencias del BFF:
+Flyway ejecuta scripts en orden y registra el historial en `flyway_schema_history` de cada base.
 
-```bash
-cd ../bff-service
-npm install
-```
+## Levantar todo con Docker
 
-4. Instalar dependencias de los servicios Java:
+Desde la raíz del repo:
 
 ```bash
-cd ../auth-service
-mvn clean install
-
-cd ../kpis-service
-mvn clean install
+docker compose up --build
 ```
 
-## Cómo ejecutar el frontend
-
-Desde la carpeta `front-web`:
+Si quieres dejarlo en segundo plano:
 
 ```bash
-cd front-web
-npm start
+docker compose up -d --build
 ```
 
-Luego abrir en el navegador:
+Ver estado:
 
-```text
-http://localhost:3000
+```bash
+docker compose ps
 ```
 
-## Cómo se comunican los servicios
+## Puertos
 
-El `front-web` no llama directamente a los servicios backend. En su lugar, usa el `bff-service` como intermediario:
+- Frontend: `http://localhost:5173`
+- BFF: `http://localhost:8000`
+- Auth API: `http://localhost:9080`
+- KPIs API: `http://localhost:9081`
+- Auth DB (host): `localhost:5433`
+- KPIs DB (host): `localhost:5434`
 
-- `front-web` → `bff-service` (`http://localhost:8000`)
-- `bff-service` → `auth-service` / `kpis-service`
+## Endpoints principales
 
-Esto permite centralizar rutas, políticas de CORS, agregación de respuestas y seguridad en un solo punto.
-
-## Autenticación
-
-El `auth-service` gestiona el login y el registro de usuarios. En este proyecto, se utiliza un repositorio en memoria para datos mock, ya que no existe una base de datos real implementada.
-
-Rutas principales del `auth-service`:
+Auth:
 
 - `POST /api/auth/login`
 - `POST /api/auth/register`
 - `GET /api/auth/health`
 - `GET /api/auth/users/me`
 
-El componente `Login.jsx` del frontend envía las credenciales al BFF y éste las reenvía al `auth-service`.
-
-## KPIs
-
-El `kpis-service` está diseñado para exponer métricas y datos de negocio a través de APIs REST. Este servicio puede entregar información agregada como ventas, rendimiento de sucursales, indicadores de canales y alertas.
-
-Rutas típicas:
+KPIs:
 
 - `GET /api/kpis/summary`
 - `GET /api/kpis/sales/monthly`
@@ -155,43 +82,8 @@ Rutas típicas:
 - `GET /api/kpis/channels`
 - `GET /api/kpis/alerts`
 
-## Buenas prácticas del proyecto
+## Notas
 
-- Utilizar flujo de Git basado en ramas: `main`, `develop`, `feature/*`
-- Ejemplo de rama: `feature/login`
-- Realizar commits claros y atómicos
-- Mantener la lógica de cada servicio aislada
-- Documentar cambios relevantes en el README y en los commits
-
-## Variables de entorno
-
-Ejemplo de `.env` para `bff-service`:
-
-```env
-PORT=8000
-AUTH_API_URL=http://localhost:8080/api/auth
-KPIS_API_URL=http://localhost:8081/api/kpis
-ALLOWED_ORIGINS=http://localhost:3000
-```
-
-Ejemplo de `.env` para `front-web` (opcional si se añaden variables):
-
-```env
-REACT_APP_API_BASE_URL=http://localhost:8000/api
-```
-
-## Equipo / Autor
-
-- Nombre: Solange Argomedo - Jose Astorga - Victor Silva
-
-
-## Notas finales y consideraciones
-
-- Este repositorio está construido como un monorepo de servicios independientes para facilitar pruebas y despliegues paralelos.
-- En un entorno productivo, se recomienda agregar una base de datos persistente, manejo de tokens JWT, seguridad de CORS y validaciones adicionales.
-- Si se requiere, se puede extender el BFF para proveer caches, autenticación centralizada y versionado de API.
-- Mantener documentadas las dependencias y versiones en cada servicio garantiza mayor robustez.
-
----
-
-`Grupo Cordillera` es una base sólida para continuar la evolución hacia una plataforma empresarial completa con frontend web, BFF, autenticación y métricas centralizadas.
+- `auth-service` usa JPA + Flyway + PostgreSQL.
+- `kpis-service` usa JDBC + Flyway + PostgreSQL.
+- El frontend activo del repositorio es `front-web2`.
