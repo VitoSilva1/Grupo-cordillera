@@ -1,8 +1,297 @@
-# Front Web 2 - Grupo Cordillera
+# front-web2 — Grupo Cordillera
 
-## 1. Descripcion general
+Aplicación web principal del panel de KPIs de Grupo Cordillera. Construida con **React 19**, **TypeScript 6**, **Vite 8** y **Tailwind CSS 4**. Permite autenticarse y visualizar indicadores de negocio, desempeño por sucursal, canales de venta y alertas operacionales.
 
-`front-web2` es la aplicacion web principal del panel de KPIs de Grupo Cordillera. Esta construida con React, TypeScript, Vite y Tailwind CSS. Su objetivo es entregar una interfaz administrativa para iniciar sesion, navegar entre modulos y visualizar indicadores de negocio como ventas, margen, stock critico, reclamos, desempeno por sucursal, ventas por canal y alertas.
+---
+
+## Índice
+
+1. [Descripción general](#1-descripción-general)
+2. [Stack tecnológico](#2-stack-tecnológico)
+3. [Estructura del proyecto](#3-estructura-del-proyecto)
+4. [Scripts disponibles](#4-scripts-disponibles)
+5. [Variables de entorno](#5-variables-de-entorno)
+6. [Flujo general de la aplicación](#6-flujo-general-de-la-aplicación)
+7. [Componentes principales](#7-componentes-principales)
+8. [Vistas](#8-vistas)
+9. [Servicios](#9-servicios)
+10. [Ejecución local sin Docker](#10-ejecución-local-sin-docker)
+11. [Dockerfile](#11-dockerfile)
+12. [Rol en el monorepo](#12-rol-en-el-monorepo)
+
+---
+
+## 1. Descripción general
+
+`front-web2` es el frontend activo del monorepo. Se comunica exclusivamente con el **BFF** (`bff-service`) en `http://localhost:8000`. Nunca llama directamente a `auth-service` ni a `kpis-service`.
+
+En desarrollo, Vite sirve la aplicación con HMR. En producción (Docker), los archivos estáticos generados por Vite son servidos por **Nginx**.
+
+---
+
+## 2. Stack tecnológico
+
+| Componente              | Versión | Uso                                                          |
+|-------------------------|---------|--------------------------------------------------------------|
+| React                   | 19      | Librería principal para UI basada en componentes             |
+| TypeScript              | 6       | Tipado estático en componentes, servicios y tipos            |
+| Vite                    | 8       | Servidor de desarrollo con HMR y bundler de producción       |
+| Tailwind CSS            | 4       | Framework utility-first para estilos                         |
+| wouter                  | —       | Router liviano para React (`Switch`, `Route`)                |
+| Recharts                | —       | Librería de gráficos (líneas, barras, torta)                 |
+| lucide-react            | —       | Set de iconos SVG usados en sidebar, header, cards y alertas |
+| ESLint 10               | —       | Linter con reglas para TypeScript y React Hooks              |
+| Nginx                   | —       | Servidor de archivos estáticos en el contenedor Docker       |
+
+---
+
+## 3. Estructura del proyecto
+
+```
+front-web2/
+├── Dockerfile
+├── eslint.config.js
+├── index.html              ← HTML raíz de Vite
+├── nginx.conf              ← Configuración de Nginx para producción
+├── package.json
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── vite.config.ts
+├── public/
+│   └── avatars/            ← Imágenes de perfil por rol
+└── src/
+    ├── main.tsx            ← Punto de entrada, monta <App />
+    ├── App.tsx             ← Enrutamiento y lógica de autenticación global
+    ├── App.css
+    ├── index.css           ← Estilos globales + configuración Tailwind
+    ├── assets/
+    ├── components/
+    │   ├── Header.tsx      ← Barra superior con usuario y botón de logout
+    │   ├── KpiCard.tsx     ← Tarjeta reutilizable para mostrar un KPI
+    │   ├── Login.tsx       ← Formulario de login
+    │   └── Sidebar.tsx     ← Menú lateral de navegación
+    ├── services/
+    │   ├── authService.ts  ← Login via API REST (BFF → auth-service)
+    │   ├── userService.ts  ← Consulta de usuarios via API REST
+    │   └── mockApi.ts      ← Datos simulados de KPIs (para desarrollo)
+    ├── strategies/
+    │   ├── kpiCardStrategies.tsx    ← Estrategias de visualización por tipo de KPI
+    │   └── alertStatusStrategy.tsx ← Estrategia de color/ícono por estado de alerta
+    ├── types/
+    │   └── user.ts         ← Tipos TypeScript: UserProfile
+    ├── utils/
+    │   ├── session-utils.ts    ← Guardar/leer/borrar usuario en sessionStorage
+    │   └── formatters-utils.ts ← Formateo de números, monedas, porcentajes
+    └── views/
+        ├── Dashboard.tsx   ← Vista principal con gráficos y tarjetas de KPIs
+        ├── KpisView.tsx    ← Vista detallada de indicadores
+        └── AlertsView.tsx  ← Vista de alertas operacionales
+```
+
+---
+
+## 4. Scripts disponibles
+
+Desde el directorio `front-web2/`:
+
+| Comando            | Descripción                                                   |
+|--------------------|---------------------------------------------------------------|
+| `npm install`      | Instala las dependencias                                      |
+| `npm run dev`      | Inicia Vite en modo desarrollo con HMR en `localhost:5173`    |
+| `npm run build`    | Compila TypeScript (`tsc -b`) y genera el build en `dist/`    |
+| `npm run lint`     | Ejecuta ESLint sobre el código fuente                         |
+| `npm run preview`  | Sirve localmente el build de producción generado              |
+
+---
+
+## 5. Variables de entorno
+
+Vite expone al navegador solo las variables que comienzan con `VITE_`. Se acceden con `import.meta.env.VITE_NOMBRE`.
+
+| Variable              | Descripción                              | Valor por defecto                   |
+|-----------------------|------------------------------------------|-------------------------------------|
+| `VITE_USERS_API_URL`  | URL base del BFF para autenticación      | `http://localhost:8000/api/auth`    |
+
+En desarrollo, crear un archivo `.env` en `front-web2/`:
+
+```env
+VITE_USERS_API_URL=http://localhost:8000/api/auth
+```
+
+En Docker, el valor se pasa como `ARG` durante el build en `docker-compose.yml`:
+
+```yaml
+build:
+  context: ./front-web2
+  args:
+    VITE_USERS_API_URL: http://localhost:8000/api/auth
+```
+
+> **Importante**: como Vite incrusta las variables en el bundle estático en tiempo de build, el valor de `VITE_USERS_API_URL` debe ser la URL que el **navegador** usará para llegar al BFF, no la URL interna de Docker.
+
+---
+
+## 6. Flujo general de la aplicación
+
+### Punto de entrada
+
+`src/main.tsx` monta `<App />` en el elemento `#root` del `index.html`.
+
+### `App.tsx` — Enrutamiento y sesión
+
+`App.tsx` controla todo el flujo de la aplicación:
+
+1. Al montar, lee el usuario guardado en `sessionStorage` con `getSessionUser()`.
+2. Si no hay usuario → renderiza `<Login />`.
+3. Si hay usuario → renderiza el layout autenticado con `<Sidebar />`, `<Header />` y la vista activa.
+4. Las rutas disponibles son:
+
+| Ruta         | Componente                                      |
+|--------------|-------------------------------------------------|
+| `/`          | `<Dashboard />`                                 |
+| `/kpis`      | `<KpisView />`                                  |
+| `/alertas`   | `<AlertsView />`                                |
+| `/reportes`  | Mensaje: "Módulo de reportes en construcción"   |
+| Cualquier otra | Mensaje: "Página no encontrada"               |
+
+### Flujo de login
+
+1. El usuario ingresa sus credenciales en `<Login />`.
+2. `Login.tsx` llama a `authService.login(login, password)`.
+3. `authService` hace `POST {VITE_USERS_API_URL}/login` al BFF.
+4. El BFF reenvía la petición a `auth-service`.
+5. Si el login es exitoso, `App.tsx` guarda el `UserProfile` en `sessionStorage` con `saveSessionUser()` y actualiza el estado.
+6. Se renderiza el layout autenticado.
+
+### Flujo de logout
+
+1. El usuario hace clic en el botón de logout en `<Header />`.
+2. `App.tsx` llama a `clearSessionUser()` y limpia el estado de usuario.
+3. Se vuelve a renderizar `<Login />`.
+
+---
+
+## 7. Componentes principales
+
+### `Login.tsx`
+
+Formulario de autenticación. Valida que los campos no estén vacíos antes de llamar al servicio. Muestra mensajes de error del backend. Acepta login por username o por email.
+
+### `Sidebar.tsx`
+
+Menú lateral de navegación con enlaces a las rutas de la aplicación. Usa iconos de `lucide-react`. Se oculta o colapsa según el diseño responsive.
+
+### `Header.tsx`
+
+Barra superior que muestra el nombre y rol del usuario autenticado, su avatar y el botón de logout. Recibe `user: UserProfile` y `onLogout` como props.
+
+### `KpiCard.tsx`
+
+Tarjeta genérica y reutilizable para mostrar un indicador de negocio. Recibe el tipo de KPI y delega la presentación (ícono, color, formato del valor) a las estrategias definidas en `kpiCardStrategies.tsx`.
+
+---
+
+## 8. Vistas
+
+### `Dashboard.tsx`
+
+Vista principal que muestra:
+- Tarjetas de KPIs con los indicadores del resumen.
+- Gráfico de ventas mensuales (líneas o barras con Recharts).
+- Gráfico de desempeño por sucursal.
+- Gráfico de canales de venta (torta).
+
+### `KpisView.tsx`
+
+Vista detallada de indicadores clave de negocio. Presenta los datos de forma tabular o con gráficos adicionales.
+
+### `AlertsView.tsx`
+
+Vista de alertas operacionales. Muestra cada alerta con su nivel de severidad, mensaje y estado. Usa `alertStatusStrategy.tsx` para determinar el color e ícono según el estado de la alerta.
+
+---
+
+## 9. Servicios
+
+### `authService.ts`
+
+Comunica el frontend con el BFF para autenticación.
+
+```ts
+authService.login(login: string, password: string): Promise<UserProfile>
+```
+
+- Hace `POST {VITE_USERS_API_URL}/login` con `{ username: login, password }`.
+- Si la respuesta no es `ok`, lanza un error con el mensaje del backend.
+- Convierte la respuesta al tipo `UserProfile`.
+
+### `userService.ts`
+
+Consulta el listado de usuarios desde el BFF.
+
+```ts
+userService.getUsers(): Promise<User[]>
+```
+
+### `mockApi.ts`
+
+Módulo de datos simulados de KPIs para desarrollo local sin depender del backend. Puede reemplazarse por llamadas reales al BFF cuando los servicios estén disponibles.
+
+### Utilidades
+
+| Archivo               | Función                                                          |
+|-----------------------|------------------------------------------------------------------|
+| `session-utils.ts`    | `getSessionUser()`, `saveSessionUser()`, `clearSessionUser()`    |
+| `formatters-utils.ts` | `formatCurrency()`, `formatPercent()`, `formatNumber()`          |
+
+---
+
+## 10. Ejecución local sin Docker
+
+Requisitos: Node.js 20+, npm.
+
+```bash
+cd front-web2
+npm install
+npm run dev
+```
+
+La aplicación estará disponible en `http://localhost:5173`.
+
+Para apuntar al BFF local, crear un archivo `.env`:
+
+```env
+VITE_USERS_API_URL=http://localhost:8000/api/auth
+```
+
+---
+
+## 11. Dockerfile
+
+El Dockerfile usa **multi-stage build**:
+
+1. **Stage build** (`node:20-alpine`): instala dependencias y ejecuta `npm run build`, generando los archivos estáticos en `dist/`.
+2. **Stage runtime** (`nginx:alpine`): copia los archivos de `dist/` y la configuración `nginx.conf`. Sirve la aplicación en el puerto `80`.
+
+La configuración de Nginx (`nginx.conf`) incluye el manejo de rutas del SPA: cualquier ruta no encontrada redirige a `index.html` para que el router del lado del cliente (`wouter`) la gestione.
+
+---
+
+## 12. Rol en el monorepo
+
+```
+Navegador  →  front-web2 (:5173 / :80 en Docker)
+                   │
+                   ▼ HTTP (VITE_USERS_API_URL)
+              bff-service (:8000)
+```
+
+- `front-web2` es el **único punto de interacción del usuario** con el sistema.
+- Depende del BFF para autenticación y datos de KPIs.
+- En Docker, el contenedor de `front-web2` **espera** a que `bff-service` esté saludable antes de arrancar.
+- El frontend legacy (`front-web/`, basado en Create React App) sigue en el repositorio pero **no está activo** en Docker Compose.
+
 
 La aplicacion pertenece a un monorepo con servicios backend separados:
 
