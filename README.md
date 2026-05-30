@@ -15,7 +15,8 @@ front-web2  (React + Vite + TypeScript)  :5173
     ▼ HTTP REST
 bff-service  (Node.js + Express)         :8000
     ├──► auth-service  (Spring Boot)     :9080  ──► auth-db  (PostgreSQL :5433)
-    └──► kpis-service  (Spring Boot)     :9081  ──► kpis-db  (PostgreSQL :5434)
+    ├──► kpis-service  (Spring Boot)     :9081  ──► kpis-db  (PostgreSQL :5434)
+    └──► user-service  (Spring Boot)     :9082  ──► user-db  (PostgreSQL :5435)
 ```
 
 - El navegador solo habla con el **BFF** (`localhost:8000`).
@@ -29,8 +30,10 @@ bff-service  (Node.js + Express)         :8000
 | Directorio     | Tecnología                      | Descripción                                        |
 |----------------|---------------------------------|----------------------------------------------------|
 | `front-web2/`  | React 19, TypeScript 6, Vite 8  | Panel web principal con login y dashboard de KPIs  |
+| `api-gateway/` | Nginx                           | Gateway HTTP entre frontend y BFF                  |
 | `bff-service/` | Node.js, Express 5, ESM         | Proxy y agregador entre frontend y microservicios  |
 | `auth-service/`| Java 25, Spring Boot 4          | Autenticación, registro y gestión de usuarios      |
+| `user-service/`| Java 25, Spring Boot 4          | Creación y consulta de usuarios                    |
 | `kpis-service/`| Java 25, Spring Boot 4          | Indicadores de negocio y datos del dashboard       |
 | `front-web/`   | React (CRA)                     | Frontend legacy (no activo en Docker)              |
 
@@ -86,9 +89,9 @@ docker compose down -v
 
 Docker Compose respeta las dependencias mediante `healthcheck`:
 
-1. `auth-db` y `kpis-db` (PostgreSQL) arrancan primero.
-2. `auth-service` y `kpis-service` esperan a que sus bases de datos estén saludables.
-3. `bff-service` espera a que ambos microservicios Java estén saludables.
+1. `auth-db`, `kpis-db` y `user-db` (PostgreSQL) arrancan primero.
+2. `auth-service`, `kpis-service` y `user-service` esperan a que sus bases de datos estén saludables.
+3. `bff-service` espera a que los microservicios Java estén saludables.
 4. `front-web2` espera a que el BFF esté saludable.
 
 ---
@@ -98,11 +101,14 @@ Docker Compose respeta las dependencias mediante `healthcheck`:
 | Servicio       | URL local                  | Puerto interno |
 |----------------|----------------------------|----------------|
 | Frontend       | http://localhost:5173      | 80             |
+| API Gateway    | http://localhost:8088      | 8088           |
 | BFF            | http://localhost:8000      | 8000           |
 | Auth API       | http://localhost:9080      | 8080           |
 | KPIs API       | http://localhost:9081      | 8081           |
+| Users API      | http://localhost:9082      | 8082           |
 | Auth DB        | localhost:5433             | 5432           |
 | KPIs DB        | localhost:5434             | 5432           |
+| Users DB       | localhost:5435             | 5432           |
 
 ---
 
@@ -130,6 +136,15 @@ Docker Compose respeta las dependencias mediante `healthcheck`:
 | GET    | `/alerts`               | Alertas operacionales activas      |
 | GET    | `/{type}`               | KPI por tipo (enum `KpiType`)      |
 
+### User Service (`/api/users`)
+
+| Método | Ruta          | Descripción                   |
+|--------|---------------|-------------------------------|
+| GET    | `/health`     | Health check del servicio     |
+| POST   | `/`           | Crear un nuevo usuario        |
+| GET    | `/`           | Listar usuarios               |
+| GET    | `/{username}` | Buscar usuario por username   |
+
 ### BFF Service
 
 | Método | Ruta              | Descripción                                      |
@@ -138,6 +153,14 @@ Docker Compose respeta las dependencias mediante `healthcheck`:
 | GET    | `/api/dashboard`  | Agrega todos los KPIs en una sola respuesta      |
 | ANY    | `/api/auth/*`     | Proxy hacia auth-service                         |
 | ANY    | `/api/kpis/*`     | Proxy hacia kpis-service                         |
+| ANY    | `/api/users/*`    | Proxy hacia user-service                         |
+
+### API Gateway
+
+| Método | Ruta          | Descripción                         |
+|--------|---------------|-------------------------------------|
+| GET    | `/health`     | Health check del gateway            |
+| ANY    | `/api/*`      | Proxy hacia BFF                     |
 
 ---
 
@@ -163,6 +186,13 @@ src/main/resources/db/migration/
 └── V3__upsert_kpis_seed_data.sql  → Actualiza/inserta datos de seed
 ```
 
+### user-service
+
+```
+src/main/resources/db/migration/
+└── V1__create_users_table.sql  → Crea la tabla users
+```
+
 ---
 
 ## Variables de entorno
@@ -183,6 +213,14 @@ src/main/resources/db/migration/
 | `SPRING_DATASOURCE_USERNAME` | `kpis_user`                                 |
 | `SPRING_DATASOURCE_PASSWORD` | `kpis_pass`                                 |
 
+### user-service
+
+| Variable                  | Valor por defecto                              |
+|---------------------------|------------------------------------------------|
+| `SPRING_DATASOURCE_URL`   | `jdbc:postgresql://localhost:5435/user_db`     |
+| `SPRING_DATASOURCE_USERNAME` | `user_user`                                 |
+| `SPRING_DATASOURCE_PASSWORD` | `user_pass`                                 |
+
 ### bff-service
 
 | Variable           | Valor por defecto                        |
@@ -190,6 +228,7 @@ src/main/resources/db/migration/
 | `PORT`             | `8000`                                   |
 | `AUTH_API_URL`     | `http://localhost:8080/api/auth`         |
 | `KPIS_API_URL`     | `http://localhost:8081/api/kpis`         |
+| `USER_API_URL`     | `http://localhost:8082/api/users`        |
 | `ALLOWED_ORIGINS`  | `http://localhost:5173`                  |
 
 ### front-web2
@@ -207,12 +246,24 @@ Grupo-cordillera/
 ├── docker-compose.yml      ← Orquestación completa del stack
 ├── .gitignore
 ├── README.md
+├── api-gateway/            ← Gateway HTTP (Nginx)
 ├── front-web2/             ← Frontend principal (React + Vite + TypeScript)
 ├── bff-service/            ← Backend For Frontend (Node.js + Express)
 ├── auth-service/           ← Microservicio de autenticación (Spring Boot)
+├── user-service/           ← Microservicio de usuarios (Spring Boot)
 ├── kpis-service/           ← Microservicio de KPIs (Spring Boot)
 └── front-web/              ← Frontend legacy (React CRA, no activo)
 ```
+
+## Kubernetes local
+
+Los manifiestos para Docker Desktop Kubernetes estan en `k8s/`. El Ingress publica:
+
+```text
+http://grupo-cordillera.local
+```
+
+Consulta `k8s/README.md` para instalar `ingress-nginx`, construir imagenes locales y aplicar el stack.
 
 ---
 
