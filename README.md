@@ -30,6 +30,7 @@ bff-service  (Node.js + Express)         :8000
 | Directorio     | Tecnología                      | Descripción                                        |
 |----------------|---------------------------------|----------------------------------------------------|
 | `front-web2/`  | React 19, TypeScript 6, Vite 8  | Panel web principal con login y dashboard de KPIs  |
+| `api-gateway/` | Nginx                           | Gateway HTTP entre frontend y BFF                  |
 | `bff-service/` | Node.js, Express 5, ESM         | Proxy y agregador entre frontend y microservicios  |
 | `auth-service/`| Java 25, Spring Boot 4          | Autenticación, registro y gestión de usuarios      |
 | `user-service/`| Java 25, Spring Boot 4          | Creación y consulta de usuarios                    |
@@ -100,6 +101,7 @@ Docker Compose respeta las dependencias mediante `healthcheck`:
 | Servicio       | URL local                  | Puerto interno |
 |----------------|----------------------------|----------------|
 | Frontend       | http://localhost:5173      | 80             |
+| API Gateway    | http://localhost:8088      | 8088           |
 | BFF            | http://localhost:8000      | 8000           |
 | Auth API       | http://localhost:9080      | 8080           |
 | KPIs API       | http://localhost:9081      | 8081           |
@@ -152,6 +154,13 @@ Docker Compose respeta las dependencias mediante `healthcheck`:
 | ANY    | `/api/auth/*`     | Proxy hacia auth-service                         |
 | ANY    | `/api/kpis/*`     | Proxy hacia kpis-service                         |
 | ANY    | `/api/users/*`    | Proxy hacia user-service                         |
+
+### API Gateway
+
+| Método | Ruta          | Descripción                         |
+|--------|---------------|-------------------------------------|
+| GET    | `/health`     | Health check del gateway            |
+| ANY    | `/api/*`      | Proxy hacia BFF                     |
 
 ---
 
@@ -237,6 +246,7 @@ Grupo-cordillera/
 ├── docker-compose.yml      ← Orquestación completa del stack
 ├── .gitignore
 ├── README.md
+├── api-gateway/            ← Gateway HTTP (Nginx)
 ├── front-web2/             ← Frontend principal (React + Vite + TypeScript)
 ├── bff-service/            ← Backend For Frontend (Node.js + Express)
 ├── auth-service/           ← Microservicio de autenticación (Spring Boot)
@@ -244,6 +254,16 @@ Grupo-cordillera/
 ├── kpis-service/           ← Microservicio de KPIs (Spring Boot)
 └── front-web/              ← Frontend legacy (React CRA, no activo)
 ```
+
+## Kubernetes local
+
+Los manifiestos para Docker Desktop Kubernetes estan en `k8s/`. El Ingress publica:
+
+```text
+http://grupo-cordillera.local
+```
+
+Consulta `k8s/README.md` para instalar `ingress-nginx`, construir imagenes locales y aplicar el stack.
 
 ---
 
