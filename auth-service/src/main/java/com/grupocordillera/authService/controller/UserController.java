@@ -3,6 +3,7 @@ package com.grupocordillera.authService.controller;
 import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
+import com.grupocordillera.authService.service.JwtService;
 import com.grupocordillera.authService.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/health")
@@ -33,6 +36,15 @@ public class UserController {
     @GetMapping("/users/me")
     public ResponseEntity<UserProfileDto> getCurrentUser() {
         return ResponseEntity.ok(userService.getCurrentUserProfile());
+    }
+
+    @GetMapping("/public-key")
+    public Map<String, String> getPublicKey() {
+        return Map.of(
+                "algorithm", "RS256",
+                "keyId", "auth-service-rsa",
+                "publicKey", jwtService.getPublicKeyPem()
+        );
     }
 
     @PostMapping("/register")
@@ -60,11 +72,15 @@ public class UserController {
             }
 
             User user = authenticatedUser.get();
+            String accessToken = jwtService.generateToken(user);
             return ResponseEntity.ok(Map.of(
                     "message", "Autenticacion exitosa",
                     "username", user.getUsername(),
                     "email", user.getEmail(),
-                    "role", user.getRole()
+                    "role", user.getRole(),
+                    "tokenType", "Bearer",
+                    "expiresIn", 3600,
+                    "accessToken", accessToken
             ));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));

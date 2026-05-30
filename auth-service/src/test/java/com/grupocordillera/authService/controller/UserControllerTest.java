@@ -20,7 +20,7 @@ class UserControllerTest {
 
     @Test
     void healthShouldReturnUpStatus() {
-        UserController controller = new UserController(new StubUserService());
+        UserController controller = new UserController(new StubUserService(), null);
 
         Map<String, String> response = controller.health();
 
@@ -32,7 +32,7 @@ class UserControllerTest {
     void getUsersMeShouldReturnCurrentUserProfile() {
         StubUserService service = new StubUserService();
         service.profile = new UserProfileDto("mock-user", "Mock User", "Supervisor", "mock@mail.com", "mockuser");
-        UserController controller = new UserController(service);
+        UserController controller = new UserController(service, null);
 
         ResponseEntity<UserProfileDto> response = controller.getCurrentUser();
 
@@ -45,7 +45,7 @@ class UserControllerTest {
     void registerShouldReturnCreatedResponse() {
         StubUserService service = new StubUserService();
         service.registeredUser = new User("victor", "victor@mail.com", "1234", "Gerente");
-        UserController controller = new UserController(service);
+        UserController controller = new UserController(service, null);
 
         ResponseEntity<?> response = controller.register(new UserDto("victor@mail.com", "victor", "1234", "Gerente"));
 
@@ -57,7 +57,7 @@ class UserControllerTest {
 
     @Test
     void loginShouldReturnUnauthorizedForInvalidCredentials() {
-        UserController controller = new UserController(new StubUserService());
+        UserController controller = new UserController(new StubUserService(), null);
 
         ResponseEntity<?> response = controller.login(new UserDto(null, "victor", "wrong", null));
 
