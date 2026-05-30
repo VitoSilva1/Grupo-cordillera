@@ -59,6 +59,7 @@ services:
   auth-service:
     build:
       context: ./auth-service
+    image: grupo-cordillera-auth-service:latest
     container_name: grupo-cordillera-auth
     restart: unless-stopped
     environment:
@@ -80,6 +81,7 @@ services:
   kpis-service:
     build:
       context: ./kpis-service
+    image: grupo-cordillera-kpis-service:latest
     container_name: grupo-cordillera-kpis
     restart: unless-stopped
     environment:
@@ -101,6 +103,7 @@ services:
   user-service:
     build:
       context: ./user-service
+    image: grupo-cordillera-user-service:latest
     container_name: grupo-cordillera-user
     restart: unless-stopped
     environment:
@@ -122,6 +125,7 @@ services:
   bff-service:
     build:
       context: ./bff-service
+    image: grupo-cordillera-bff-service:latest
     container_name: grupo-cordillera-bff
     restart: unless-stopped
     environment:
@@ -146,16 +150,35 @@ services:
     ports:
       - "8000:8000"
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+    image: grupo-cordillera-api-gateway:latest
+    container_name: grupo-cordillera-api-gateway
+    restart: unless-stopped
+    depends_on:
+      bff-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8088/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    ports:
+      - "8088:8088"
+
   front-web2:
     build:
       context: ./front-web2
       args:
-        VITE_USERS_API_URL: http://localhost:8000/api/auth
-        VITE_USER_API_URL: http://localhost:8000/api/users
+        VITE_USERS_API_URL: /api/auth
+        VITE_USER_API_URL: /api/users
+    image: grupo-cordillera-front-web2:latest
     container_name: grupo-cordillera-front
     restart: unless-stopped
     depends_on:
-      bff-service:
+      api-gateway:
         condition: service_healthy
     ports:
       - "5173:80"
