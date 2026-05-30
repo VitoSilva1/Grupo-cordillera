@@ -6,6 +6,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 8000);
 const AUTH_API_URL = process.env.AUTH_API_URL || 'http://localhost:8080/api/auth';
 const KPIS_API_URL = process.env.KPIS_API_URL || 'http://localhost:8081/api/kpis';
+const USER_API_URL = process.env.USER_API_URL || 'http://localhost:8082/api/users';
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
   .split(',')
@@ -25,7 +26,9 @@ function buildHeaders(incomingHeaders) {
 }
 
 async function proxyRequest(req, res, baseUrl) {
-  const proxyUrl = `${baseUrl}${req.path}${new URLSearchParams(req.query).toString() ? `?${new URLSearchParams(req.query)}` : ''}`;
+  const targetPath = req.path === '/' ? '' : req.path;
+  const queryString = new URLSearchParams(req.query).toString();
+  const proxyUrl = `${baseUrl}${targetPath}${queryString ? `?${queryString}` : ''}`;
   const response = await fetch(proxyUrl, {
     method: req.method,
     headers: buildHeaders(req.headers),
@@ -86,8 +89,48 @@ app.get('/api/dashboard', async (_req, res, next) => {
   }
 });
 
+app.post('/api/users', async (req, res, next) => {
+  try {
+    const userResponse = await fetch(USER_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+
+    const userPayload = await userResponse.json();
+    const userAlreadyExists = !userResponse.ok
+      && typeof userPayload.error === 'string'
+      && (userPayload.error.includes('usuario ya existe') || userPayload.error.includes('email ya existe'));
+
+    if (!userResponse.ok && !userAlreadyExists) {
+      return res.status(userResponse.status).json(userPayload);
+    }
+
+    const authResponse = await fetch(`${AUTH_API_URL}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        role: req.body.role,
+      }),
+    });
+
+    const authPayload = await authResponse.json();
+    if (!authResponse.ok) {
+      return res.status(authResponse.status).json(authPayload);
+    }
+
+    return res.status(201).json(userAlreadyExists ? authPayload : userPayload);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.use('/api/auth', forward(AUTH_API_URL));
 app.use('/api/kpis', forward(KPIS_API_URL));
+app.use('/api/users', forward(USER_API_URL));
 
 app.use((error, _req, res, _next) => {
   console.error(error);

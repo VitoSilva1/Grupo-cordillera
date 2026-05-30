@@ -1,6 +1,7 @@
 import { AlertCircle, LockKeyhole, UserRound } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { Link } from 'wouter';
 import { authService } from '../services/authService';
 import type { UserProfile } from '../types/user';
 
@@ -118,6 +119,13 @@ export function Login({ onLogin }: LoginProps) {
           >
             {isLoading ? 'Validando...' : 'Entrar'}
           </button>
+
+          <p className="text-center text-sm text-slate-500">
+            No tienes usuario?{' '}
+            <Link href="/crear-usuario" className="font-semibold text-brand-800 transition hover:text-brand-900">
+              Crear usuario
+            </Link>
+          </p>
         </form>
       </section>
     </main>

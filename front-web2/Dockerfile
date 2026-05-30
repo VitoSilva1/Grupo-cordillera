@@ -2,7 +2,9 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 ARG VITE_USERS_API_URL=http://localhost:8000/api/auth
+ARG VITE_USER_API_URL=http://localhost:8000/api/users
 ENV VITE_USERS_API_URL=$VITE_USERS_API_URL
+ENV VITE_USER_API_URL=$VITE_USER_API_URL
 
 COPY package.json package-lock.json ./
 RUN npm ci
