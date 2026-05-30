@@ -6,8 +6,8 @@ COPY src ./src
 
 RUN mvn -DskipTests package
 
-FROM eclipse-temurin:25-jre
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+FROM eclipse-temurin:25-jre-alpine
+RUN apk add --no-cache curl
 WORKDIR /app
 
 COPY --from=build /app/target/kpis-service-0.0.1-SNAPSHOT.jar app.jar

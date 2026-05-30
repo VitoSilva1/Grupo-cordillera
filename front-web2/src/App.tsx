@@ -5,6 +5,7 @@ import { Login } from './components/Login';
 import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
+import { CreateUser } from './views/CreateUser';
 import type { UserProfile } from './types/user';
 import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session-utils';
 import { useState } from 'react';
@@ -24,7 +25,14 @@ function App() {
   };
 
   if (!user) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <Switch>
+        <Route path="/crear-usuario" component={CreateUser} />
+        <Route>
+          <Login onLogin={handleLogin} />
+        </Route>
+      </Switch>
+    );
   }
 
   return (
