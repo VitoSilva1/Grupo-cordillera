@@ -5,6 +5,9 @@ export interface UserProfile {
     email?: string;
     username?: string;
     avatarUrl?: string;
+    accessToken?: string;
+    tokenType?: string;
+    expiresIn?: number;
 }
 
 export interface CreateUserPayload {
