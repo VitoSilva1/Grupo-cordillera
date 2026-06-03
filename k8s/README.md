@@ -52,7 +52,18 @@ Desde la raiz del proyecto:
 docker compose build
 ```
 
-Docker Desktop Kubernetes puede usar esas imagenes locales porque quedan en el mismo Docker Engine.
+El `docker-compose.yml` construye las imagenes desde la estructura actual del monorepo:
+
+| Servicio       | Build context                 | Imagen usada por Kubernetes                     |
+|----------------|-------------------------------|-------------------------------------------------|
+| auth-service   | `./Backend/auth-service`      | `grupo-cordillera-auth-service:latest`          |
+| kpis-service   | `./Backend/kpis-service`      | `grupo-cordillera-kpis-service:latest`          |
+| user-service   | `./Backend/user-service`      | `grupo-cordillera-user-service:latest`          |
+| bff-service    | `./Backend/bff-service`       | `grupo-cordillera-bff-service:latest`           |
+| api-gateway    | `./Backend/api-gateway`       | `grupo-cordillera-api-gateway:latest`           |
+| front-web2     | `./frontend/front-web2`       | `grupo-cordillera-front-web2:latest`            |
+
+Los manifiestos de `k8s/` no necesitan rutas a carpetas de codigo porque despliegan imagenes ya construidas. Docker Desktop Kubernetes puede usar esas imagenes locales porque quedan en el mismo Docker Engine.
 
 ## 4. Aplicar manifiestos
 
@@ -102,6 +113,17 @@ Reiniciar un deployment:
 
 ```powershell
 kubectl rollout restart deployment/api-gateway -n grupo-cordillera
+```
+
+Si reconstruyes imagenes con `docker compose build` usando el mismo tag `:latest`, reinicia los deployments para que Kubernetes vuelva a crear los pods:
+
+```powershell
+kubectl rollout restart deployment/auth-service -n grupo-cordillera
+kubectl rollout restart deployment/kpis-service -n grupo-cordillera
+kubectl rollout restart deployment/user-service -n grupo-cordillera
+kubectl rollout restart deployment/bff-service -n grupo-cordillera
+kubectl rollout restart deployment/api-gateway -n grupo-cordillera
+kubectl rollout restart deployment/front-web2 -n grupo-cordillera
 ```
 
 Eliminar el stack:
