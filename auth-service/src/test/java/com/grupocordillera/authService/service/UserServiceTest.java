@@ -3,22 +3,54 @@ package com.grupocordillera.authService.service;
 import com.grupocordillera.authService.dto.UserDto;
 import com.grupocordillera.authService.dto.UserProfileDto;
 import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.InMemoryUserRepository;
+import com.grupocordillera.authService.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UserServiceTest {
 
     private UserService userService;
+    private UserRepository userRepository;
+    private List<User> users;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(new InMemoryUserRepository());
+        userRepository = mock(UserRepository.class);
+        users = new ArrayList<>();
+
+        when(userRepository.existsByUsername(any())).thenAnswer(inv -> users.stream()
+                .anyMatch(u -> u.getUsername().equals(inv.getArgument(0))));
+        when(userRepository.existsByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
+                .anyMatch(u -> u.getEmail().equalsIgnoreCase(inv.getArgument(0))));
+        when(userRepository.existsByEmail(any())).thenAnswer(inv -> users.stream()
+                .anyMatch(u -> u.getEmail().equals(inv.getArgument(0))));
+        when(userRepository.findByUsername(any())).thenAnswer(inv -> users.stream()
+                .filter(u -> u.getUsername().equals(inv.getArgument(0)))
+                .findFirst());
+        when(userRepository.findByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
+                .filter(u -> u.getEmail().equalsIgnoreCase(inv.getArgument(0)))
+                .findFirst());
+        when(userRepository.findAll()).thenAnswer(inv -> new ArrayList<>(users));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User user = inv.getArgument(0);
+            users.removeIf(existing -> existing.getUsername().equals(user.getUsername()));
+            users.add(user);
+            return user;
+        });
+
+        userService = new UserService(userRepository);
     }
 
     @Test
@@ -90,14 +122,6 @@ class UserServiceTest {
         assertEquals("guest", profile.id());
         assertEquals("Invitado", profile.name());
         assertEquals("Sin cargo", profile.role());
-    }
-
-    @Test
-    void getMockUserProfileShouldReturnSupervisor() {
-        UserProfileDto profile = userService.getMockUserProfile("Supervisor");
-
-        assertEquals("mock-supervisor", profile.id());
-        assertEquals("Supervisor", profile.role());
     }
 
     @Test

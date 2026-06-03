@@ -174,6 +174,21 @@ curl http://localhost:8000/health
 }
 ```
 
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph API_Gateway["API Gateway / BFF Service"]
+    A[Cliente] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[User Service]
+    B --> E[Book Service]
+    B --> F[Loan Service]
+  end
+```
+
+Para más diagramas del conjunto de microservicios, ver `ARCHITECTURE_DIAGRAMS.md`.
+
 ## 9. Cómo Ejecutar con Docker
 
 ### Construcción:

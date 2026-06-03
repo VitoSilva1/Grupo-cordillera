@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # KPIs Service
 
 ## 1. Nombre y Descripción del Microservicio
@@ -126,11 +127,59 @@ server.port=8081
 ## 8. Cómo Ejecutar Localmente
 
 ### Iniciar el servicio en modo desarrollo:
+=======
+# kpis-service
+
+Microservicio de KPIs (Spring Boot) con base de datos propia y migraciones.
+
+## Base de datos
+
+- Motor: PostgreSQL
+- Contenedor: `kpis-db`
+- Base: `kpis_db`
+- Usuario: `kpis_user`
+- Puerto host: `5434`
+
+## Migraciones Flyway
+
+Ubicación:
+
+- `src/main/resources/db/migration`
+
+Migraciones incluidas:
+
+- `V1__create_kpis_schema.sql`
+- `V2__seed_kpis_data.sql`
+
+Tablas creadas:
+
+- `kpi_summary`
+- `monthly_sales`
+- `branch_performance`
+- `sales_channels`
+- `alerts`
+
+## Configuración
+
+`application.properties` usa variables de entorno:
+
+- `SPRING_DATASOURCE_URL`
+- `SPRING_DATASOURCE_USERNAME`
+- `SPRING_DATASOURCE_PASSWORD`
+
+Con Docker Compose, estas variables ya están definidas.
+
+## Ejecutar local (sin Docker)
+
+1. Levanta PostgreSQL local (o Docker) en `localhost:5434` con `kpis_db`.
+2. Ejecuta:
+>>>>>>> 224a73201f667ccc03d0eb6225d213cb99180821
 
 ```bash
 mvn spring-boot:run
 ```
 
+<<<<<<< HEAD
 El servicio estará disponible en: `http://localhost:8081`
 
 ### Verificar que el servicio está activo:
@@ -146,6 +195,20 @@ curl http://localhost:8081/api/kpis/health
   "service": "kpis-service"
 }
 ```
+
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph Kpis_Service["KPIs Service"]
+    A[Cliente] --> B[Controller]
+    B --> C[Service]
+    C --> D[Repository]
+    D --> E[(Base de Datos)]
+  end
+```
+
+Para más diagramas del conjunto de microservicios, ver `ARCHITECTURE_DIAGRAMS.md`.
 
 ## 9. Cómo Ejecutar con Docker
 
@@ -559,3 +622,12 @@ Para reportar problemas o sugerencias, crear un issue en el repositorio del proy
 **Estado**: En desarrollo  
 **Versión**: 0.0.1-SNAPSHOT  
 **Última actualización**: Mayo 2026
+=======
+## Endpoints
+
+- `GET /api/kpis/summary`
+- `GET /api/kpis/sales/monthly`
+- `GET /api/kpis/branches/performance`
+- `GET /api/kpis/channels`
+- `GET /api/kpis/alerts`
+>>>>>>> 224a73201f667ccc03d0eb6225d213cb99180821

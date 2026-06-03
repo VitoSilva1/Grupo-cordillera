@@ -1,5 +1,6 @@
 # Grupo Cordillera - Plataforma de Inteligencia de Negocio
 
+<<<<<<< HEAD
 ## 1. Portada del Proyecto
 
 ### Sistema de Análisis de KPIs y Gestión de Usuarios - Microservicios
@@ -19,6 +20,8 @@ Necesidad de desarrollar una plataforma empresarial escalable que centralice la 
 ---
 
 ## 2. Arquitectura General del Sistema
+
+Para revisar los diagramas simplificados de cada microservicio y el diagrama general, ver `ARCHITECTURE_DIAGRAMS.md`.
 
 ### Diagrama de Arquitectura Conceptual
 
@@ -895,13 +898,66 @@ mvn clean install
 cd ../kpis-service
 mvn clean install
 ```
+=======
+Monorepo con arquitectura de microservicios para frontend, BFF, autenticación y KPIs.
+
+## Servicios
+
+- `front-web2`: frontend (Vite + React).
+- `bff-service`: Backend for Frontend (Node/Express).
+- `auth-service`: autenticación/usuarios (Spring Boot).
+- `kpis-service`: indicadores de negocio (Spring Boot).
+
+- **Frontend**: React, Create React App
+- **Backend BFF**: Node.js, Express, CORS
+- **Autenticación**: Spring Boot, Java 25 LTS
+- **KPIs**: Spring Boot, Java 25 LTS
+- **Construcción**: Maven para servicios Java
+- **Gestión de dependencias**: npm para frontend y BFF
+- **Comunicación**: APIs REST JSON
+
+Se implementó una **base de datos por microservicio**:
+
+- `auth-service` -> `auth-db` (`auth_db`, PostgreSQL, host port `5433`)
+- `kpis-service` -> `kpis-db` (`kpis_db`, PostgreSQL, host port `5434`)
+- `bff-service` no tiene base de datos (solo orquesta APIs)
+
+## Migraciones
+
+Cada microservicio maneja sus propias migraciones con Flyway:
+
+- `auth-service/src/main/resources/db/migration`
+  - `V1__create_users_table.sql`
+  - `V2__seed_default_users.sql`
+- `kpis-service/src/main/resources/db/migration`
+  - `V1__create_kpis_schema.sql`
+  - `V2__seed_kpis_data.sql`
+
+Flyway ejecuta scripts en orden y registra el historial en `flyway_schema_history` de cada base.
+
+## Levantar todo con Docker
+
+Desde la raíz del repo:
+
+```bash
+docker compose up --build
+```
+
+Si quieres dejarlo en segundo plano:
+
+```bash
+docker compose up -d --build
+```
+
+Ver estado:
+>>>>>>> 224a73201f667ccc03d0eb6225d213cb99180821
 
 **4. Instalar BFF Service:**
 ```bash
-cd ../bff-service
-npm install
+docker compose ps
 ```
 
+<<<<<<< HEAD
 **5. Instalar Frontend:**
 ```bash
 cd ../front-web2
@@ -1507,3 +1563,36 @@ Los integrantes del equipo han colaborado efectivamente para construir un sistem
 ---
 
 *Grupo Cordillera © 2024 - Duoc UC DSY1106*
+=======
+## Puertos
+
+- Frontend: `http://localhost:5173`
+- BFF: `http://localhost:8000`
+- Auth API: `http://localhost:9080`
+- KPIs API: `http://localhost:9081`
+- Auth DB (host): `localhost:5433`
+- KPIs DB (host): `localhost:5434`
+
+## Endpoints principales
+
+Auth:
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/auth/health`
+- `GET /api/auth/users/me`
+
+KPIs:
+
+- `GET /api/kpis/summary`
+- `GET /api/kpis/sales/monthly`
+- `GET /api/kpis/branches/performance`
+- `GET /api/kpis/channels`
+- `GET /api/kpis/alerts`
+
+## Notas
+
+- `auth-service` usa JPA + Flyway + PostgreSQL.
+- `kpis-service` usa JDBC + Flyway + PostgreSQL.
+- El frontend activo del repositorio es `front-web2`.
+>>>>>>> 224a73201f667ccc03d0eb6225d213cb99180821

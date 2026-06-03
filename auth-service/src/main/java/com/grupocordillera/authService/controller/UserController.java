@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,15 +35,6 @@ public class UserController {
         return ResponseEntity.ok(userService.getCurrentUserProfile());
     }
 
-    @GetMapping("/users/mock")
-    public ResponseEntity<?> getMockUser(@RequestParam String role) {
-        try {
-            return ResponseEntity.ok(userService.getMockUserProfile(role));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
-        }
-    }
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDto userDto) {
         try {
@@ -63,15 +53,18 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDto userDto) {
         try {
-            boolean authenticated = userService.authenticate(userDto);
-            if (!authenticated) {
+            var authenticatedUser = userService.authenticateAndGetUser(userDto);
+            if (authenticatedUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Credenciales invalidas"));
             }
 
+            User user = authenticatedUser.get();
             return ResponseEntity.ok(Map.of(
                     "message", "Autenticacion exitosa",
-                    "username", userDto.getUsername()
+                    "username", user.getUsername(),
+                    "email", user.getEmail(),
+                    "role", user.getRole()
             ));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));

@@ -1,3 +1,4 @@
+
 # Auth Service
 
 ## 1. Nombre y Descripción del Microservicio
@@ -109,10 +110,98 @@ docker build -t grupo-cordillera/auth-service:latest .
 **Archivo de configuración:** `src/main/resources/application.properties`
 
 Para ambiente de producción, crear `application-prod.properties`:
+
+# Auth Service - Grupo Cordillera
+
+## 1. Descripcion general
+
+`auth-service` es el microservicio encargado de la autenticacion y gestion basica de usuarios del sistema Grupo Cordillera.
+
+Esta construido con Java 25 LTS y Spring Boot 4.0.6. Expone una API REST bajo el prefijo `/api/auth`, valida credenciales, permite registrar usuarios, entrega perfiles de usuario y mantiene una lista de usuarios en memoria para fines de desarrollo y demostracion.
+
+Dentro del monorepo, este servicio se conecta con:
+
+- `front-web2`: aplicacion React/Vite que muestra el login y el dashboard.
+- `bff-service`: Backend For Frontend en Node.js/Express que actua como proxy entre el frontend y los microservicios.
+- `docker-compose.yml`: orquestacion local de `auth-service`, `kpis-service`, `bff-service` y `front-web2`.
+
+En la arquitectura Docker actual, `front-web2` no llama directamente a `auth-service`. El navegador llama a `bff-service` en `http://localhost:8000/api/auth`, y el BFF reenvia la peticion al contenedor `auth-service` en `http://auth-service:8080/api/auth`.
+
+## 2. Stack tecnologico
+
+### Runtime y framework
+
+- **Java 25 LTS**: version del lenguaje definida en `pom.xml`.
+- **Spring Boot 4.0.6**: framework principal para levantar la aplicacion, configurar beans y exponer endpoints REST. Se usa esta version porque declara compatibilidad con Java 25.
+- **Spring Web MVC**: incluido por `spring-boot-starter-web`; permite usar `@RestController`, `@RequestMapping`, `@GetMapping`, `@PostMapping`, `ResponseEntity` y conversion JSON automatica.
+- **Maven**: gestor de dependencias y build del proyecto.
+
+### Testing
+
+- **spring-boot-starter-test**: dependencia de pruebas. Incluye JUnit 5, AssertJ, Mockito y utilidades de testing de Spring.
+- **JUnit 5**: usado directamente en `UserServiceTest`.
+
+### Contenedores
+
+- **Docker multi-stage build**:
+  - Primer stage: `maven:3.9.11-eclipse-temurin-25`, compila el JAR.
+  - Segundo stage: `eclipse-temurin:25-jre`, ejecuta el JAR final.
+
+## 3. Estructura del proyecto
+
+```text
+auth-service/
+|-- Dockerfile
+|-- pom.xml
+|-- README.md
+`-- src/
+    |-- main/
+    |   |-- java/com/grupocordillera/authService/
+    |   |   |-- AuthServiceApplication.java
+    |   |   |-- config/
+    |   |   |   `-- WebConfig.java
+    |   |   |-- controller/
+    |   |   |   `-- UserController.java
+    |   |   |-- dto/
+    |   |   |   |-- UserDto.java
+    |   |   |   `-- UserProfileDto.java
+    |   |   |-- model/
+    |   |   |   `-- User.java
+    |   |   |-- repository/
+    |   |   |   `-- InMemoryUserRepository.java
+    |   |   `-- service/
+    |   |       `-- UserService.java
+    |   `-- resources/
+    |       `-- application.properties
+    `-- test/
+        `-- java/com/grupocordillera/authService/service/
+            `-- UserServiceTest.java
+```
+
+## 4. Configuracion
+
+El archivo `src/main/resources/application.properties` define:
+
+
 ```properties
 spring.application.name=auth-service
 server.port=8080
 ```
+
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph Auth_Service["Auth Service"]
+    A[Cliente] --> B[Controller]
+    B --> C[Service]
+    C --> D[Repository]
+    D --> E[(Base de Datos)]
+    C --> F[JWT Service]
+  end
+```
+
+Para más diagramas del conjunto de microservicios, ver `ARCHITECTURE_DIAGRAMS.md`.
 
 ## 8. Cómo Ejecutar Localmente
 
