@@ -58,7 +58,7 @@ services:
 
   auth-service:
     build:
-      context: ./auth-service
+      context: ./Backend/auth-service
     image: grupo-cordillera-auth-service:latest
     container_name: grupo-cordillera-auth
     restart: unless-stopped
@@ -80,7 +80,7 @@ services:
 
   kpis-service:
     build:
-      context: ./kpis-service
+      context: ./Backend/kpis-service
     image: grupo-cordillera-kpis-service:latest
     container_name: grupo-cordillera-kpis
     restart: unless-stopped
@@ -102,7 +102,7 @@ services:
 
   user-service:
     build:
-      context: ./user-service
+      context: ./Backend/user-service
     image: grupo-cordillera-user-service:latest
     container_name: grupo-cordillera-user
     restart: unless-stopped
@@ -124,7 +124,7 @@ services:
 
   bff-service:
     build:
-      context: ./bff-service
+      context: ./Backend/bff-service
     image: grupo-cordillera-bff-service:latest
     container_name: grupo-cordillera-bff
     restart: unless-stopped
@@ -152,7 +152,7 @@ services:
 
   api-gateway:
     build:
-      context: ./api-gateway
+      context: ./Backend/api-gateway
     image: grupo-cordillera-api-gateway:latest
     container_name: grupo-cordillera-api-gateway
     restart: unless-stopped
@@ -170,10 +170,11 @@ services:
 
   front-web2:
     build:
-      context: ./front-web2
+      context: ./frontend/front-web2
       args:
         VITE_USERS_API_URL: /api/auth
         VITE_USER_API_URL: /api/users
+        VITE_KPIS_API_URL: /api/kpis
     image: grupo-cordillera-front-web2:latest
     container_name: grupo-cordillera-front
     restart: unless-stopped
