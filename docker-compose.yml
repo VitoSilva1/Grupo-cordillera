@@ -18,25 +18,6 @@ services:
     volumes:
       - auth-db-data:/var/lib/postgresql/data
 
-  kpis-db:
-    image: postgres:16
-    container_name: grupo-cordillera-kpis-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: kpis_db
-      POSTGRES_USER: kpis_user
-      POSTGRES_PASSWORD: kpis_pass
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kpis_user -d kpis_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    ports:
-      - "5434:5432"
-    volumes:
-      - kpis-db-data:/var/lib/postgresql/data
-
   user-db:
     image: postgres:16
     container_name: grupo-cordillera-user-db
@@ -83,11 +64,9 @@ services:
     container_name: grupo-cordillera-kpis
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://kpis-db:5432/kpis_db
-      SPRING_DATASOURCE_USERNAME: kpis_user
-      SPRING_DATASOURCE_PASSWORD: kpis_pass
+      REPORT_SERVICE_URL: http://report-service:8082
     depends_on:
-      kpis-db:
+      report-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8081/api/kpis/health >/dev/null 2>&1 || curl -fsS http://localhost:8081/api/kpis/health >/dev/null"]
@@ -146,6 +125,46 @@ services:
     ports:
       - "8000:8000"
 
+  reports-db:
+    image: postgres:16
+    container_name: grupo-cordillera-reports-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: reports_db
+      POSTGRES_USER: reports_user
+      POSTGRES_PASSWORD: reports_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reports_user -d reports_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5436:5432"
+    volumes:
+      - reports-db-data:/var/lib/postgresql/data
+
+  report-service:
+    build:
+      context: ./report-service
+    container_name: grupo-cordillera-reports
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://reports-db:5432/reports_db
+      SPRING_DATASOURCE_USERNAME: reports_user
+      SPRING_DATASOURCE_PASSWORD: reports_pass
+    depends_on:
+      reports-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/reports/health >/dev/null 2>&1 || curl -fsS http://localhost:8082/api/reports/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    ports:
+      - "9083:8082"
+
   front-web2:
     build:
       context: ./front-web2
@@ -162,5 +181,5 @@ services:
 
 volumes:
   auth-db-data:
-  kpis-db-data:
   user-db-data:
+  reports-db-data:
