@@ -26,7 +26,7 @@ const initialForm: FormState = {
   role: 'Vendedor',
 };
 
-const roles = ['Gerente', 'Supervisor', 'Vendedor'];
+const roles = ['Gerente', 'Supervisor', 'Vendedor', 'Analista'];
 
 export function CreateUser() {
   const [, navigate] = useLocation();

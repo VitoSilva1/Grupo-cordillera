@@ -32,7 +32,7 @@ Satisfacción Cliente,94',
     'KPI_SUMMARY', '2026-03-01', '2026-03-31', 'CSV', 'FAILED',
     NULL,
     NULL,
-    'Error al conectar con kpis-service: Connection refused',
+    'Error al generar el reporte: datos de KPI no disponibles en ese período',
     NOW() - INTERVAL '10 days',
     NOW() - INTERVAL '10 days'
 );

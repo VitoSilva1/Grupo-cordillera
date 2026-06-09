@@ -1,4 +1,4 @@
-package com.grupocordillera.kpis.model;
+package com.grupocordillera.reports.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -29,4 +29,3 @@ public enum AlertStatus {
         throw new IllegalArgumentException("Estado de alerta desconocido: " + value);
     }
 }
-

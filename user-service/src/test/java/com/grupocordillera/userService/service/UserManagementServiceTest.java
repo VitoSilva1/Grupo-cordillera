@@ -94,7 +94,7 @@ class UserManagementServiceTest {
                 ))
         );
 
-        assertEquals("El role debe ser Gerente, Supervisor o Vendedor", exception.getMessage());
+        assertEquals("El role debe ser Gerente, Supervisor, Vendedor o Analista", exception.getMessage());
     }
 
     private CreateUserRequest validRequest(String username, String email) {

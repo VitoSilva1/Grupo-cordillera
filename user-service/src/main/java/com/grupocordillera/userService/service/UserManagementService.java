@@ -12,7 +12,7 @@ import java.util.Set;
 @Service
 public class UserManagementService {
 
-    private static final Set<String> ALLOWED_ROLES = Set.of("Gerente", "Supervisor", "Vendedor");
+    private static final Set<String> ALLOWED_ROLES = Set.of("Gerente", "Supervisor", "Vendedor", "Analista");
 
     private final UserRepository userRepository;
 
@@ -70,7 +70,7 @@ public class UserManagementService {
         }
 
         if (!ALLOWED_ROLES.contains(request.role().trim())) {
-            throw new IllegalArgumentException("El role debe ser Gerente, Supervisor o Vendedor");
+            throw new IllegalArgumentException("El role debe ser Gerente, Supervisor, Vendedor o Analista");
         }
     }
 

@@ -4,23 +4,23 @@ import com.grupocordillera.reports.dto.CreateReportRequest;
 import com.grupocordillera.reports.dto.ReportJobResponse;
 import com.grupocordillera.reports.model.ReportFormat;
 import com.grupocordillera.reports.model.ReportJob;
+import com.grupocordillera.reports.repository.KpiRepository;
 import com.grupocordillera.reports.repository.ReportJobRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
 public class ReportService {
 
     private final ReportJobRepository reportJobRepository;
-    private final KpiClient kpiClient;
+    private final KpiRepository kpiRepository;
 
-    public ReportService(ReportJobRepository reportJobRepository, KpiClient kpiClient) {
+    public ReportService(ReportJobRepository reportJobRepository, KpiRepository kpiRepository) {
         this.reportJobRepository = reportJobRepository;
-        this.kpiClient = kpiClient;
+        this.kpiRepository = kpiRepository;
     }
 
     public ReportJobResponse createReport(CreateReportRequest request) {
@@ -29,7 +29,7 @@ public class ReportService {
         ReportJob createdJob = reportJobRepository.create(request.type(), request.dateFrom(), request.dateTo(), request.format());
 
         try {
-            String csvContent = buildSummaryCsv(kpiClient.getSummary());
+            String csvContent = buildSummaryCsv(kpiRepository.getSummaryMap());
             String fileName = "report-" + createdJob.id() + ".csv";
             reportJobRepository.markReady(createdJob.id(), fileName, csvContent);
         } catch (Exception ex) {

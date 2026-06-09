@@ -1,3 +1,4 @@
+-- Tablas KPI absorbidas desde kpis-service
 CREATE TABLE kpi_summary (
     id SMALLINT PRIMARY KEY,
     ventas_totales BIGINT NOT NULL,

@@ -5,83 +5,101 @@ import com.grupocordillera.kpis.dto.BranchPerformanceResponse;
 import com.grupocordillera.kpis.dto.KpiSummaryResponse;
 import com.grupocordillera.kpis.dto.MonthlySalesResponse;
 import com.grupocordillera.kpis.dto.SalesChannelResponse;
-import com.grupocordillera.kpis.model.KpiType;
-import com.grupocordillera.kpis.service.factory.KpiStrategyFactory;
-import com.grupocordillera.kpis.service.strategy.KpiStrategy;
+import com.grupocordillera.kpis.model.AlertStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 
+@ExtendWith(MockitoExtension.class)
 class KpiQueryServiceTest {
+
+    @Mock RestClient restClient;
+    @Mock RestClient.RequestHeadersUriSpec<?> headersSpec;
+    @Mock RestClient.ResponseSpec responseSpec;
 
     private KpiQueryService queryService;
 
     @BeforeEach
     void setUp() {
-        KpiSummaryResponse summary = new KpiSummaryResponse(145000000L, 32.5, 18, 5, 45000L, 94);
-        List<MonthlySalesResponse> monthly = List.of(new MonthlySalesResponse("Ene", 110));
-        List<BranchPerformanceResponse> branches = List.of(new BranchPerformanceResponse("Santiago", 98));
-        List<SalesChannelResponse> channels = List.of(new SalesChannelResponse("E-commerce", 25));
-        List<AlertResponse> alerts = List.of(new AlertResponse("1", "Stock Crítico", null, "2026-04-27", "Detalle"));
-
-        KpiStrategyFactory factory = new KpiStrategyFactory(List.of(
-                strategy(KpiType.SUMMARY, summary),
-                strategy(KpiType.MONTHLY_SALES, monthly),
-                strategy(KpiType.BRANCH_PERFORMANCE, branches),
-                strategy(KpiType.SALES_CHANNELS, channels),
-                strategy(KpiType.ALERTS, alerts)
-        ));
-
-        queryService = new KpiQueryService(factory);
+        queryService = new KpiQueryService(restClient);
+        doReturn(headersSpec).when(restClient).get();
+        doReturn(headersSpec).when(headersSpec).uri(anyString());
+        doReturn(responseSpec).when(headersSpec).retrieve();
     }
 
     @Test
-    void getSummaryShouldDelegateToSummaryStrategy() {
+    @SuppressWarnings("unchecked")
+    void getSummaryShouldReturnMappedResponse() {
+        Map<String, Object> raw = Map.of(
+                "ventasTotales", 145000000,
+                "margenUtilidad", 32.5,
+                "stockCritico", 18,
+                "reclamosActivos", 5,
+                "ticketPromedio", 45000,
+                "satisfaccionCliente", 94
+        );
+        doReturn(raw).when(responseSpec).body(any(Class.class));
+
         KpiSummaryResponse result = queryService.getSummary();
+
+        assertNotNull(result);
         assertEquals(145000000L, result.ventasTotales());
+        assertEquals(32.5, result.margenUtilidad());
     }
 
     @Test
-    void getMonthlySalesShouldReturnMonthlyValues() {
-        assertEquals(1, queryService.getMonthlySales().size());
+    @SuppressWarnings("unchecked")
+    void getMonthlySalesShouldReturnList() {
+        List<MonthlySalesResponse> data = List.of(
+                new MonthlySalesResponse("Ene", 110),
+                new MonthlySalesResponse("Feb", 120)
+        );
+        doReturn(data).when(responseSpec).body(any(ParameterizedTypeReference.class));
+
+        List<MonthlySalesResponse> result = queryService.getMonthlySales();
+
+        assertEquals(2, result.size());
+        assertEquals("Ene", result.get(0).month());
     }
 
     @Test
-    void getBranchPerformanceShouldReturnBranchMetrics() {
-        assertEquals("Santiago", queryService.getBranchPerformance().get(0).branch());
+    @SuppressWarnings("unchecked")
+    void getBranchPerformanceShouldReturnList() {
+        List<BranchPerformanceResponse> data = List.of(
+                new BranchPerformanceResponse("Santiago", 95)
+        );
+        doReturn(data).when(responseSpec).body(any(ParameterizedTypeReference.class));
+
+        List<BranchPerformanceResponse> result = queryService.getBranchPerformance();
+
+        assertEquals(1, result.size());
+        assertEquals("Santiago", result.get(0).branch());
     }
 
     @Test
-    void getSalesChannelsShouldReturnChannels() {
-        assertEquals("E-commerce", queryService.getSalesChannels().get(0).channel());
-    }
+    @SuppressWarnings("unchecked")
+    void getAlertsShouldReturnList() {
+        List<AlertResponse> data = List.of(
+                new AlertResponse("1", "Stock Crítico", AlertStatus.CRITICO, "2026-04-27", "Detalle")
+        );
+        doReturn(data).when(responseSpec).body(any(ParameterizedTypeReference.class));
 
-    @Test
-    void getAlertsShouldReturnAlertList() {
-        assertEquals("1", queryService.getAlerts().get(0).id());
-    }
+        List<AlertResponse> result = queryService.getAlerts();
 
-    @Test
-    void getByTypeShouldReturnStrategyResultForType() {
-        Object result = queryService.getByType(KpiType.SALES_CHANNELS);
-        assertSame(queryService.getSalesChannels(), result);
-    }
-
-    private static <T> KpiStrategy<T> strategy(KpiType type, T response) {
-        return new KpiStrategy<>() {
-            @Override
-            public KpiType supports() {
-                return type;
-            }
-
-            @Override
-            public T execute() {
-                return response;
-            }
-        };
+        assertEquals(1, result.size());
+        assertEquals(AlertStatus.CRITICO, result.get(0).status());
     }
 }

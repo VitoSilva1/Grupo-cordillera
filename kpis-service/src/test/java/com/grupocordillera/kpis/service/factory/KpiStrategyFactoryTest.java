@@ -1,41 +1,42 @@
 package com.grupocordillera.kpis.service.factory;
 
-import com.grupocordillera.kpis.model.KpiType;
-import com.grupocordillera.kpis.service.strategy.KpiStrategy;
+import com.grupocordillera.kpis.model.AlertStatus;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-class KpiStrategyFactoryTest {
+/**
+ * Tests del enum AlertStatus que reemplazó a KpiStrategyFactory
+ * en la arquitectura proxy.
+ */
+class AlertStatusTest {
 
-    @Test
-    void getStrategyShouldReturnRegisteredStrategyByType() {
-        @SuppressWarnings("unchecked")
-        KpiStrategy<?> summaryStrategy = mock(KpiStrategy.class);
-        when(summaryStrategy.supports()).thenReturn(KpiType.SUMMARY);
-
-        KpiStrategyFactory factory = new KpiStrategyFactory(List.of(summaryStrategy));
-
-        assertEquals(summaryStrategy, factory.getStrategy(KpiType.SUMMARY));
+    @ParameterizedTest
+    @CsvSource({
+            "Crítico,     CRITICO",
+            "Advertencia, ADVERTENCIA",
+            "Informativo, INFORMATIVO",
+            "CRITICO,     CRITICO",
+            "ADVERTENCIA, ADVERTENCIA",
+            "INFORMATIVO, INFORMATIVO"
+    })
+    void fromValueShouldMapLabelToEnum(String label, String expectedName) {
+        AlertStatus result = AlertStatus.fromValue(label.trim());
+        assertEquals(AlertStatus.valueOf(expectedName), result);
     }
 
     @Test
-    void getStrategyShouldThrowWhenTypeNotRegistered() {
-        @SuppressWarnings("unchecked")
-        KpiStrategy<?> summaryStrategy = mock(KpiStrategy.class);
-        when(summaryStrategy.supports()).thenReturn(KpiType.SUMMARY);
+    void fromValueShouldThrowOnUnknownLabel() {
+        assertThrows(IllegalArgumentException.class, () -> AlertStatus.fromValue("DESCONOCIDO"));
+    }
 
-        KpiStrategyFactory factory = new KpiStrategyFactory(List.of(summaryStrategy));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> factory.getStrategy(KpiType.ALERTS));
-
-        assertEquals("No existe una estrategia para el KPI solicitado: " + KpiType.ALERTS, exception.getMessage());
+    @Test
+    void getLabelShouldReturnReadableSpanishLabel() {
+        assertEquals("Crítico",     AlertStatus.CRITICO.getLabel());
+        assertEquals("Advertencia", AlertStatus.ADVERTENCIA.getLabel());
+        assertEquals("Informativo", AlertStatus.INFORMATIVO.getLabel());
     }
 }
