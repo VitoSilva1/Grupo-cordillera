@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: grupo-cordillera
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+  SPRING_DATASOURCE_USERNAME: auth_user

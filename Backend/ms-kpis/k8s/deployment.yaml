@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kpis-service
+  namespace: grupo-cordillera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kpis-service
+  template:
+    metadata:
+      labels:
+        app: kpis-service
+    spec:
+      containers:
+        - name: kpis-service
+          image: grupo-cordillera-kpis-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: kpis-service-config
+            - secretRef:
+                name: kpis-service-secret
+          readinessProbe:
+            httpGet:
+              path: /api/kpis/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/kpis/health
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 20
