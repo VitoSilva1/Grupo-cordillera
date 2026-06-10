@@ -92,6 +92,17 @@ Notar que dentro de la red Docker los servicios se comunican por nombre de conte
 | Ejecución directa  | `localhost:8000` |
 | Docker Compose     | `localhost:8000` (mapeado de `8000:8000`) |
 
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph API_Gateway["API Gateway / BFF Service"]
+    A[Cliente] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[KPIs Service]
+  end
+```
+
 ---
 
 ## 5. Endpoints

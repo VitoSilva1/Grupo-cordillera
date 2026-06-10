@@ -153,6 +153,18 @@ spring.flyway.locations=classpath:db/migration
 | Ejecución directa  | `localhost:8081` |
 | Docker Compose     | `localhost:9081` (mapeado de `9081:8081`) |
 
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph Kpis_Service["KPIs Service"]
+    A[Cliente] --> B[Controller]
+    B --> C[Service]
+    C --> D[Repository]
+    D --> E[(Base de Datos)]
+  end
+```
+
 ---
 
 ## 5. Base de datos y migraciones

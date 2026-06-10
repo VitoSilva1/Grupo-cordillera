@@ -127,6 +127,19 @@ Con Docker Compose estas variables se inyectan automáticamente.
 | Ejecución directa  | `localhost:8080` |
 | Docker Compose     | `localhost:9080` (mapeado de `9080:8080`) |
 
+## Diagrama de Arquitectura
+
+```mermaid
+flowchart TB
+  subgraph Auth_Service["Auth Service"]
+    A[Cliente] --> B[Controller]
+    B --> C[Service]
+    C --> D[Repository]
+    D --> E[(Base de Datos)]
+    C --> F[JWT Service]
+  end
+```
+
 ---
 
 ## 5. Base de datos y migraciones
