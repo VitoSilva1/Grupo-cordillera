@@ -1,5 +1,6 @@
 import request from 'supertest';
-import app from '../index.js';
+
+import app from '../app.js';
 
 describe('GET /health', () => {
   it('should return status UP and service name', async () => {
@@ -9,7 +10,7 @@ describe('GET /health', () => {
 
     expect(response.body).toEqual({
       status: 'UP',
-      service: 'bff-service'
+      service: 'bff-service',
     });
   });
 });
