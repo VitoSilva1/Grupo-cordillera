@@ -1,6 +1,6 @@
 # Grupo Cordillera — Monorepo
 
-Sistema de panel de KPIs empresariales construido con una arquitectura de microservicios. Permite a los usuarios autenticarse y visualizar indicadores de negocio como ventas, márgenes, desempeño por sucursal, canales de venta y alertas operacionales.
+Sistema de panel de KPIs empresariales construido con una arquitectura de microservicios. Permite a los usuarios autenticarse y visualizar indicadores de negocio como ventas, márgenes, desempeño por sucursal, canales de venta y alertas operacionales. actualizado
 
 ---
 
@@ -27,15 +27,14 @@ bff-service  (Node.js + Express)         :8000
 
 ## Servicios del monorepo
 
-| Directorio     | Tecnología                      | Descripción                                        |
-|----------------|---------------------------------|----------------------------------------------------|
-| `front-web2/`  | React 19, TypeScript 6, Vite 8  | Panel web principal con login y dashboard de KPIs  |
-| `api-gateway/` | Nginx                           | Gateway HTTP entre frontend y BFF                  |
-| `bff-service/` | Node.js, Express 5, ESM         | Proxy y agregador entre frontend y microservicios  |
-| `auth-service/`| Java 25, Spring Boot 4          | Autenticación, registro y gestión de usuarios      |
-| `user-service/`| Java 25, Spring Boot 4          | Creación y consulta de usuarios                    |
-| `kpis-service/`| Java 25, Spring Boot 4          | Indicadores de negocio y datos del dashboard       |
-| `front-web/`   | React (CRA)                     | Frontend legacy (no activo en Docker)              |
+| Directorio                    | Tecnología                      | Descripción                                        |
+|-------------------------------|---------------------------------|----------------------------------------------------|
+| `frontend/front-web2/`        | React 19, TypeScript 6, Vite 8  | Panel web principal con login y dashboard de KPIs  |
+| `Backend/api-gateway/`        | Nginx                           | Gateway HTTP entre frontend y BFF                  |
+| `Backend/bff-service/`        | Node.js, Express 5, ESM         | Proxy y agregador entre frontend y microservicios  |
+| `Backend/auth-service/`       | Java 25, Spring Boot 4          | Autenticación, registro y gestión de usuarios      |
+| `Backend/user-service/`       | Java 25, Spring Boot 4          | Creación y consulta de usuarios                    |
+| `Backend/kpis-service/`       | Java 25, Spring Boot 4          | Indicadores de negocio y datos del dashboard       |
 
 ---
 
@@ -54,6 +53,17 @@ Desde la raíz del repositorio:
 ```bash
 docker compose up --build
 ```
+
+El `docker-compose.yml` construye las imágenes desde la estructura actual del monorepo:
+
+| Servicio       | Build context                 | Imagen local                                  |
+|----------------|-------------------------------|-----------------------------------------------|
+| auth-service   | `./Backend/auth-service`      | `grupo-cordillera-auth-service:latest`        |
+| kpis-service   | `./Backend/kpis-service`      | `grupo-cordillera-kpis-service:latest`        |
+| user-service   | `./Backend/user-service`      | `grupo-cordillera-user-service:latest`        |
+| bff-service    | `./Backend/bff-service`       | `grupo-cordillera-bff-service:latest`         |
+| api-gateway    | `./Backend/api-gateway`       | `grupo-cordillera-api-gateway:latest`         |
+| front-web2     | `./frontend/front-web2`       | `grupo-cordillera-front-web2:latest`          |
 
 En segundo plano:
 
@@ -235,7 +245,9 @@ src/main/resources/db/migration/
 
 | Variable              | Valor por defecto                   |
 |-----------------------|-------------------------------------|
-| `VITE_USERS_API_URL`  | `http://localhost:8000/api/auth`    |
+| `VITE_USERS_API_URL`  | `/api/auth`                         |
+| `VITE_USER_API_URL`   | `/api/users`                        |
+| `VITE_KPIS_API_URL`   | `/api/kpis`                         |
 
 ---
 
@@ -246,13 +258,15 @@ Grupo-cordillera/
 ├── docker-compose.yml      ← Orquestación completa del stack
 ├── .gitignore
 ├── README.md
-├── api-gateway/            ← Gateway HTTP (Nginx)
-├── front-web2/             ← Frontend principal (React + Vite + TypeScript)
-├── bff-service/            ← Backend For Frontend (Node.js + Express)
-├── auth-service/           ← Microservicio de autenticación (Spring Boot)
-├── user-service/           ← Microservicio de usuarios (Spring Boot)
-├── kpis-service/           ← Microservicio de KPIs (Spring Boot)
-└── front-web/              ← Frontend legacy (React CRA, no activo)
+├── Backend/
+│   ├── api-gateway/        ← Gateway HTTP (Nginx)
+│   ├── bff-service/        ← Backend For Frontend (Node.js + Express)
+│   ├── auth-service/       ← Microservicio de autenticación (Spring Boot)
+│   ├── user-service/       ← Microservicio de usuarios (Spring Boot)
+│   └── kpis-service/       ← Microservicio de KPIs (Spring Boot)
+├── frontend/
+│   └── front-web2/         ← Frontend principal (React + Vite + TypeScript)
+└── k8s/                    ← Manifiestos Kubernetes locales
 ```
 
 ## Kubernetes local
