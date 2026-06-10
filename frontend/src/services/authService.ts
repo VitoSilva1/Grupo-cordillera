@@ -7,6 +7,9 @@ interface LoginResponse {
   username?: string;
   email?: string;
   role?: string;
+  accessToken?: string;
+  tokenType?: string;
+  expiresIn?: number;
   error?: string;
 }
 
@@ -36,6 +39,9 @@ export const authService = {
       role: data.role || 'Sin cargo',
       email: data.email ?? (login.includes('@') ? login : undefined),
       username,
+      accessToken: data.accessToken,
+      tokenType: data.tokenType,
+      expiresIn: data.expiresIn,
     };
   },
 };
