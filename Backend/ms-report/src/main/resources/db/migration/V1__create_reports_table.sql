@@ -1,0 +1,8 @@
+CREATE TABLE reports (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description VARCHAR(500),
+    report_type VARCHAR(50) NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    generated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
