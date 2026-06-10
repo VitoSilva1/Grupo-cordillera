@@ -1,6 +1,6 @@
 # Grupo Cordillera — Monorepo
 
-Sistema de panel de KPIs empresariales construido con una arquitectura de microservicios. Permite a los usuarios autenticarse y visualizar indicadores de negocio como ventas, márgenes, desempeño por sucursal, canales de venta y alertas operacionales.
+Sistema de panel de KPIs empresariales construido con una arquitectura de microservicios. Permite a los usuarios autenticarse y visualizar indicadores de negocio como ventas, márgenes, desempeño por sucursal, canales de venta y alertas operacionales. actualizado
 
 ---
 
