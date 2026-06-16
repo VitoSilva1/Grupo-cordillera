@@ -216,3 +216,76 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: report-db-data
+  namespace: grupo-cordillera
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-db
+  namespace: grupo-cordillera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-db
+  template:
+    metadata:
+      labels:
+        app: report-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: grupo-cordillera-config
+                  key: REPORT_DB_NAME
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: grupo-cordillera-config
+                  key: REPORT_DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grupo-cordillera-db-secret
+                  key: REPORT_DB_PASSWORD
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "report_user", "-d", "report_db"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: report-db-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-db
+  namespace: grupo-cordillera
+spec:
+  selector:
+    app: report-db
+  ports:
+    - port: 5432
+      targetPort: 5432
