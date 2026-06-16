@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: user-service-config
+  name: report-service-config
   namespace: grupo-cordillera
 data:
-  SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_db
-  SPRING_DATASOURCE_USERNAME: user_user
+  SPRING_DATASOURCE_URL: jdbc:postgresql://report-db:5432/report_db
+  SPRING_DATASOURCE_USERNAME: report_user
