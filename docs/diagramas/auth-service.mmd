@@ -1,8 +1,13 @@
 flowchart TB
-  subgraph Auth_Service["Auth Service"]
-    A[Cliente] --> B[Controller]
-    B --> C[Service]
-    C --> D[Repository]
-    D --> E[(Base de Datos)]
-    C --> F[JWT Service]
+  Client["BFF / API Consumer"] --> Controller["UserController\n/api/auth"]
+
+  subgraph AuthService["ms-auth"]
+    Controller --> AuthLogic["Auth logic\nlogin / register / profile"]
+    AuthLogic --> JwtService["JwtService\nsign / public key"]
+    AuthLogic --> UserClient["UserClient\nHTTP client"]
   end
+
+  UserClient --> UserApi["ms-user\n/api/users"]
+  UserApi --> UserDb[("user_db\nPostgreSQL")]
+
+  NoDb["No local auth database"] -.-> AuthService

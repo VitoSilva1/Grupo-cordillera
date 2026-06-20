@@ -1,8 +1,11 @@
-flowchart TB
-  subgraph API_Gateway["API Gateway"]
-    A[Cliente] --> B[API Gateway]
-    B --> C[Auth Service]
-    B --> D[User Service]
-    B --> E[Book Service]
-    B --> F[Loan Service]
-  end
+flowchart LR
+  Browser["Browser / Frontend"] --> Gateway["API Gateway\nNginx :8088"]
+
+  Gateway --> BFF["BFF Service\nNode.js / Express :8000"]
+  BFF --> Auth["ms-auth\nSpring Boot :9080"]
+  BFF --> Users["ms-user\nSpring Boot :9082"]
+  BFF --> Kpis["ms-kpis\nSpring Boot :9081"]
+
+  Auth --> Users
+  Users --> UserDb[("user_db\nPostgreSQL")]
+  Kpis --> KpisDb[("kpis_db\nPostgreSQL")]

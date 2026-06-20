@@ -1,0 +1,11 @@
+flowchart TB
+  Client["BFF / API Consumer"] --> Controller["ReportController\n/api/reports"]
+
+  subgraph ReportService["ms-report"]
+    Controller --> Service["ReportService\nbusiness rules"]
+    Service --> Repository["ReportRepository\nSpring Data JPA"]
+    Controller --> Handler["RestExceptionHandler\nstandard errors"]
+  end
+
+  Repository --> ReportDb[("report_db\nPostgreSQL")]
+  ReportDb --> Flyway["Flyway migrations\nreports schema + seed data"]
