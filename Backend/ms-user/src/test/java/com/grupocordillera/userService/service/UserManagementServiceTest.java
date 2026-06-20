@@ -1,8 +1,8 @@
-package com.grupocordillera.userService.service;
+package com.grupocordillera.userservice.service;
 
-import com.grupocordillera.userService.dto.CreateUserRequest;
-import com.grupocordillera.userService.model.User;
-import com.grupocordillera.userService.repository.UserRepository;
+import com.grupocordillera.userservice.dto.CreateUserRequest;
+import com.grupocordillera.userservice.model.User;
+import com.grupocordillera.userservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +30,12 @@ class UserManagementServiceTest {
         when(userRepository.existsByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
                 .anyMatch(user -> user.getEmail().equalsIgnoreCase(inv.getArgument(0))));
         when(userRepository.findAll()).thenAnswer(inv -> new ArrayList<>(users));
+        when(userRepository.findByUsername(any())).thenAnswer(inv -> users.stream()
+                .filter(user -> user.getUsername().equals(inv.getArgument(0)))
+                .findFirst());
+        when(userRepository.findByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
+                .filter(user -> user.getEmail().equalsIgnoreCase(inv.getArgument(0)))
+                .findFirst());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> {
             User user = inv.getArgument(0);
             users.add(user);

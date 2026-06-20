@@ -1,4 +1,4 @@
-package com.grupocordillera.userService.dto;
+package com.grupocordillera.userservice.dto;
 
 public record CreateUserRequest(
         String username,

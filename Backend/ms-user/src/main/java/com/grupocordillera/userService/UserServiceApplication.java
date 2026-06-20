@@ -1,4 +1,4 @@
-package com.grupocordillera.userService;
+package com.grupocordillera.userservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

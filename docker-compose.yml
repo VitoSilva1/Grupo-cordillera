@@ -1,23 +1,4 @@
 services:
-  auth-db:
-    image: postgres:16
-    container_name: grupo-cordillera-auth-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: auth_pass
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    ports:
-      - "5433:5432"
-    volumes:
-      - auth-db-data:/var/lib/postgresql/data
-
   kpis-db:
     image: postgres:16
     container_name: grupo-cordillera-kpis-db
@@ -56,6 +37,25 @@ services:
     volumes:
       - user-db-data:/var/lib/postgresql/data
 
+  report-db:
+    image: postgres:16
+    container_name: grupo-cordillera-report-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: report_db
+      POSTGRES_USER: report_user
+      POSTGRES_PASSWORD: report_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U report_user -d report_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5436:5432"
+    volumes:
+      - report-db-data:/var/lib/postgresql/data
+
   auth-service:
     build:
       context: ./Backend/ms-auth
@@ -63,11 +63,9 @@ services:
     container_name: grupo-cordillera-auth
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: auth_user
-      SPRING_DATASOURCE_PASSWORD: auth_pass
+      USER_SERVICE_URL: http://user-service:8082/api/users
     depends_on:
-      auth-db:
+      user-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/auth/health >/dev/null 2>&1 || curl -fsS http://localhost:8080/api/auth/health >/dev/null"]
@@ -121,6 +119,28 @@ services:
       start_period: 20s
     ports:
       - "9082:8082"
+
+  report-service:
+    build:
+      context: ./Backend/ms-report
+    image: grupo-cordillera-report-service:latest
+    container_name: grupo-cordillera-report
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://report-db:5432/report_db
+      SPRING_DATASOURCE_USERNAME: report_user
+      SPRING_DATASOURCE_PASSWORD: report_pass
+    depends_on:
+      report-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/reports/health >/dev/null 2>&1 || curl -fsS http://localhost:8082/api/reports/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    ports:
+      - "9083:8082"
 
   bff-service:
     build:
@@ -185,6 +205,6 @@ services:
       - "5173:80"
 
 volumes:
-  auth-db-data:
   kpis-db-data:
   user-db-data:
+  report-db-data:

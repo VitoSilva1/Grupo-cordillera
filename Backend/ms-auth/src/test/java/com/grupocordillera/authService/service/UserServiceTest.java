@@ -1,9 +1,9 @@
-package com.grupocordillera.authService.service;
+package com.grupocordillera.authservice.service;
 
-import com.grupocordillera.authService.dto.UserDto;
-import com.grupocordillera.authService.dto.UserProfileDto;
-import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.UserRepository;
+import com.grupocordillera.authservice.client.UserClient;
+import com.grupocordillera.authservice.dto.UserDto;
+import com.grupocordillera.authservice.dto.UserProfileDto;
+import com.grupocordillera.authservice.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,35 +22,38 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     private UserService userService;
-    private UserRepository userRepository;
+    private UserClient userClient;
     private List<User> users;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class);
+        userClient = mock(UserClient.class);
         users = new ArrayList<>();
 
-        when(userRepository.existsByUsername(any())).thenAnswer(inv -> users.stream()
-                .anyMatch(u -> u.getUsername().equals(inv.getArgument(0))));
-        when(userRepository.existsByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
-                .anyMatch(u -> u.getEmail().equalsIgnoreCase(inv.getArgument(0))));
-        when(userRepository.existsByEmail(any())).thenAnswer(inv -> users.stream()
-                .anyMatch(u -> u.getEmail().equals(inv.getArgument(0))));
-        when(userRepository.findByUsername(any())).thenAnswer(inv -> users.stream()
-                .filter(u -> u.getUsername().equals(inv.getArgument(0)))
-                .findFirst());
-        when(userRepository.findByEmailIgnoreCase(any())).thenAnswer(inv -> users.stream()
-                .filter(u -> u.getEmail().equalsIgnoreCase(inv.getArgument(0)))
-                .findFirst());
-        when(userRepository.findAll()).thenAnswer(inv -> new ArrayList<>(users));
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
-            User user = inv.getArgument(0);
+        when(userClient.findAll()).thenAnswer(inv -> new ArrayList<>(users));
+        when(userClient.create(any(UserDto.class))).thenAnswer(inv -> {
+            UserDto userDto = inv.getArgument(0);
+            if (users.stream().anyMatch(user -> user.getUsername().equals(userDto.getUsername()))) {
+                throw new IllegalArgumentException("El usuario ya existe");
+            }
+            if (users.stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(userDto.getEmail()))) {
+                throw new IllegalArgumentException("El email ya existe");
+            }
+            User user = new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getRole());
             users.removeIf(existing -> existing.getUsername().equals(user.getUsername()));
             users.add(user);
             return user;
         });
+        when(userClient.authenticate(any(), any())).thenAnswer(inv -> {
+            String login = inv.getArgument(0);
+            String password = inv.getArgument(1);
+            return users.stream()
+                    .filter(user -> user.getUsername().equals(login) || user.getEmail().equalsIgnoreCase(login))
+                    .filter(user -> user.getPassword().equals(password))
+                    .findFirst();
+        });
 
-        userService = new UserService(userRepository);
+        userService = new UserService(userClient);
     }
 
     @Test

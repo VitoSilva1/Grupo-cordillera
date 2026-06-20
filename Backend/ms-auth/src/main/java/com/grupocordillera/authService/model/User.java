@@ -1,25 +1,13 @@
-package com.grupocordillera.authService.model;
+package com.grupocordillera.authservice.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "users")
 public class User {
 
-    @Id
-    @Column(nullable = false, length = 100)
+    private Long id;
     private String username;
-
-    @Column(nullable = false, length = 255)
-    private String password;
-
-    @Column(nullable = false, unique = true, length = 150)
     private String email;
-
-    @Column(nullable = false, length = 30)
+    private String password;
+    private String firstName;
+    private String lastName;
     private String role;
 
     public User() {
@@ -48,6 +36,22 @@ public class User {
         return role;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -63,5 +67,12 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
-}
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+}

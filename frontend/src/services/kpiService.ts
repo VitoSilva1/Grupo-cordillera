@@ -1,20 +1,20 @@
 export interface KpiSummary {
-  ventasTotales: number;
-  margenUtilidad: number;
-  stockCritico: number;
-  reclamosActivos: number;
-  ticketPromedio: number;
-  satisfaccionCliente: number;
+  totalSales: number;
+  profitMargin: number;
+  criticalStock: number;
+  activeClaims: number;
+  averageTicket: number;
+  customerSatisfaction: number;
 }
 
 export interface MonthlySales {
   month: string;
-  ventas: number;
+  sales: number;
 }
 
 export interface BranchPerformance {
   branch: string;
-  desempeño: number;
+  performance: number;
 }
 
 export interface SalesChannel {
@@ -30,6 +30,16 @@ export interface Alert {
   description: string;
 }
 
+type RawKpiSummary = Record<string, number>;
+
+type RawMonthlySales = {
+  month: string;
+} & Record<string, number | string>;
+
+type RawBranchPerformance = {
+  branch: string;
+} & Record<string, number | string | undefined>;
+
 const KPIS_API_URL = import.meta.env.VITE_KPIS_API_URL || 'http://localhost:8000/api/kpis';
 
 async function getJson<T>(path: string): Promise<T> {
@@ -41,9 +51,28 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export const kpiService = {
-  getSummary: () => getJson<KpiSummary>('/summary'),
-  getSales: () => getJson<MonthlySales[]>('/sales/monthly'),
-  getBranchesPerformance: () => getJson<BranchPerformance[]>('/branches/performance'),
+  getSummary: async (): Promise<KpiSummary> => {
+    const summary = await getJson<RawKpiSummary>('/summary');
+    return {
+      totalSales: summary['ventasTotales'],
+      profitMargin: summary['margenUtilidad'],
+      criticalStock: summary['stockCritico'],
+      activeClaims: summary['reclamosActivos'],
+      averageTicket: summary['ticketPromedio'],
+      customerSatisfaction: summary['satisfaccionCliente'],
+    };
+  },
+  getSales: async (): Promise<MonthlySales[]> => {
+    const sales = await getJson<RawMonthlySales[]>('/sales/monthly');
+    return sales.map((item) => ({ month: item.month, sales: Number(item['ventas']) }));
+  },
+  getBranchesPerformance: async (): Promise<BranchPerformance[]> => {
+    const branches = await getJson<RawBranchPerformance[]>('/branches/performance');
+    return branches.map((item) => ({
+      branch: item.branch,
+      performance: Number(item['desempeño'] ?? item['desempeÃ±o'] ?? 0),
+    }));
+  },
   getSalesByChannel: () => getJson<SalesChannel[]>('/channels'),
   getAlerts: () => getJson<Alert[]>('/alerts'),
 };

@@ -1,10 +1,10 @@
-package com.grupocordillera.authService.controller;
+package com.grupocordillera.authservice.controller;
 
-import com.grupocordillera.authService.dto.UserDto;
-import com.grupocordillera.authService.dto.UserProfileDto;
-import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.service.JwtService;
-import com.grupocordillera.authService.service.UserService;
+import com.grupocordillera.authservice.dto.UserDto;
+import com.grupocordillera.authservice.dto.UserProfileDto;
+import com.grupocordillera.authservice.model.User;
+import com.grupocordillera.authservice.service.JwtService;
+import com.grupocordillera.authservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

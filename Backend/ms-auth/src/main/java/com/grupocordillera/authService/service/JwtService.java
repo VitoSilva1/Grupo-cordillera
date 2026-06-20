@@ -1,6 +1,6 @@
-package com.grupocordillera.authService.service;
+package com.grupocordillera.authservice.service;
 
-import com.grupocordillera.authService.model.User;
+import com.grupocordillera.authservice.model.User;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;

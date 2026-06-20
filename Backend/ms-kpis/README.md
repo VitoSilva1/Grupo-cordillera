@@ -348,6 +348,41 @@ Endpoint genérico que acepta cualquier valor del enum `KpiType`.
 
 ## 8. Tests
 
+## Swagger y OpenAPI
+
+Con Docker Compose levantado, la documentacion interactiva esta disponible en:
+
+```text
+http://localhost:9081/swagger-ui/index.html
+```
+
+La especificacion OpenAPI en JSON se puede validar con:
+
+```powershell
+Invoke-WebRequest http://localhost:9081/v3/api-docs -UseBasicParsing
+```
+
+Pruebas rapidas de endpoints:
+
+```powershell
+Invoke-RestMethod http://localhost:9081/api/kpis/summary
+Invoke-RestMethod http://localhost:9081/api/kpis/alerts
+```
+
+Ejemplos para probar operaciones en Swagger:
+
+| Metodo | Endpoint | Como probar |
+|---|---|---|
+| GET | `/api/kpis/health` | Presionar **Try it out** y luego **Execute**. Debe responder `200 OK`. |
+| GET | `/api/kpis/summary` | Ejecutar sin parametros para ver el resumen de KPIs. |
+| GET | `/api/kpis/sales/monthly` | Ejecutar sin parametros para ver ventas mensuales. |
+| GET | `/api/kpis/branches/performance` | Ejecutar sin parametros para ver desempeno por sucursal. |
+| GET | `/api/kpis/channels` | Ejecutar sin parametros para ver canales de venta. |
+| GET | `/api/kpis/alerts` | Ejecutar sin parametros para ver alertas. |
+| GET | `/api/kpis/{type}` | Usar `SUMMARY`, `MONTHLY_SALES`, `BRANCH_PERFORMANCE`, `SALES_CHANNELS` o `ALERTS`. |
+
+`ms-kpis` es un servicio de consulta; actualmente no expone endpoints `POST` ni `PUT`.
+
 Los tests se ubican en `src/test/java/com/grupocordillera/kpis/`.
 
 | Clase                       | Qué prueba                                                      |

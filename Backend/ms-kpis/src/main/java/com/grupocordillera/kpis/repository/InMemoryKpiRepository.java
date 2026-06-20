@@ -19,31 +19,31 @@ public class InMemoryKpiRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public long getVentasTotales() {
+    public long getTotalSales() {
         return jdbcTemplate.queryForObject("SELECT ventas_totales FROM kpi_summary WHERE id = 1", Long.class);
     }
 
-    public double getMargenUtilidad() {
+    public double getProfitMargin() {
         Double value = jdbcTemplate.queryForObject("SELECT margen_utilidad FROM kpi_summary WHERE id = 1", Double.class);
         return value == null ? 0.0 : value;
     }
 
-    public int getStockCritico() {
+    public int getCriticalStock() {
         Integer value = jdbcTemplate.queryForObject("SELECT stock_critico FROM kpi_summary WHERE id = 1", Integer.class);
         return value == null ? 0 : value;
     }
 
-    public int getReclamosActivos() {
+    public int getActiveClaims() {
         Integer value = jdbcTemplate.queryForObject("SELECT reclamos_activos FROM kpi_summary WHERE id = 1", Integer.class);
         return value == null ? 0 : value;
     }
 
-    public long getTicketPromedio() {
+    public long getAverageTicket() {
         Long value = jdbcTemplate.queryForObject("SELECT ticket_promedio FROM kpi_summary WHERE id = 1", Long.class);
         return value == null ? 0L : value;
     }
 
-    public int getSatisfaccionCliente() {
+    public int getCustomerSatisfaction() {
         Integer value = jdbcTemplate.queryForObject("SELECT satisfaccion_cliente FROM kpi_summary WHERE id = 1", Integer.class);
         return value == null ? 0 : value;
     }

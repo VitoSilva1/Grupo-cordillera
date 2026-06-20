@@ -1,9 +1,9 @@
-package com.grupocordillera.authService.service;
+package com.grupocordillera.authservice.service;
 
-import com.grupocordillera.authService.dto.UserDto;
-import com.grupocordillera.authService.dto.UserProfileDto;
-import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.UserRepository;
+import com.grupocordillera.authservice.client.UserClient;
+import com.grupocordillera.authservice.dto.UserDto;
+import com.grupocordillera.authservice.dto.UserProfileDto;
+import com.grupocordillera.authservice.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,105 +15,70 @@ public class UserService {
 
     private static final Set<String> ALLOWED_ROLES = Set.of("Gerente", "Supervisor", "Vendedor");
 
-    private final UserRepository userRepository;
-    
+    private final UserClient userClient;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserService(UserClient userClient) {
+        this.userClient = userClient;
     }
 
     public User register(UserDto userDto) {
         validateRegisterDto(userDto);
-
-        String email = userDto.getEmail().trim().toLowerCase();
-        String username = userDto.getUsername().trim();
-        if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("El usuario ya existe");
-        }
-
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("El email ya existe");
-        }
-
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(userDto.getPassword());
-        user.setRole(userDto.getRole().trim());
-        return userRepository.save(user);
+        userDto.setEmail(userDto.getEmail().trim().toLowerCase());
+        userDto.setUsername(userDto.getUsername().trim());
+        userDto.setRole(userDto.getRole().trim());
+        return userClient.create(userDto);
     }
 
     public boolean authenticate(UserDto userDto) {
-        validateLoginDto(userDto);
-
-        String login = userDto.getUsername().trim();
-        Optional<User> user = userRepository.findByUsername(login)
-                .or(() -> userRepository.findByEmailIgnoreCase(login));
-
-        return user
-                .map(foundUser -> foundUser.getPassword().equals(userDto.getPassword()))
-                .orElse(false);
+        return authenticateAndGetUser(userDto).isPresent();
     }
 
     public Optional<User> authenticateAndGetUser(UserDto userDto) {
         validateLoginDto(userDto);
-
-        String login = userDto.getUsername().trim();
-        Optional<User> user = userRepository.findByUsername(login)
-                .or(() -> userRepository.findByEmailIgnoreCase(login));
-
-        return user
-                .filter(foundUser -> foundUser.getPassword().equals(userDto.getPassword()));
+        return userClient.authenticate(userDto.getUsername().trim(), userDto.getPassword());
     }
 
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userClient.findAll();
     }
 
     public UserProfileDto getCurrentUserProfile() {
-        Optional<User> currentUser = userRepository.findAll().stream().findFirst();
-        if (currentUser.isPresent()) {
-            User user = currentUser.get();
-            return new UserProfileDto(
-                    user.getUsername(),
-                    user.getUsername(),
-                    user.getRole(),
-                    user.getEmail(),
-                    user.getUsername()
-            );
-        }
-
-        return new UserProfileDto(
-                "guest",
-                "Invitado",
-                "Sin cargo",
-                null,
-                "guest"
-        );
+        return userClient.findAll().stream()
+                .findFirst()
+                .map(user -> new UserProfileDto(
+                        user.getUsername(),
+                        fullNameOrUsername(user),
+                        user.getRole(),
+                        user.getEmail(),
+                        user.getUsername()
+                ))
+                .orElseGet(() -> new UserProfileDto("guest", "Invitado", "Sin cargo", null, "guest"));
     }
+
+    private String fullNameOrUsername(User user) {
+        String fullName = String.join(" ",
+                Optional.ofNullable(user.getFirstName()).orElse("").trim(),
+                Optional.ofNullable(user.getLastName()).orElse("").trim()
+        ).trim();
+        return fullName.isBlank() ? user.getUsername() : fullName;
+    }
+
     private void validateRegisterDto(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
         }
-
         if (userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()) {
             throw new IllegalArgumentException("El email es obligatorio");
         }
-
-        String email = userDto.getEmail().trim();
-        if (!email.contains("@")) {
+        if (!userDto.getEmail().trim().contains("@")) {
             throw new IllegalArgumentException("El email no es valido");
         }
-
         if (userDto.getRole() == null || userDto.getRole().trim().isEmpty()) {
             throw new IllegalArgumentException("El role es obligatorio");
         }
-
-        String role = userDto.getRole().trim();
-        if (!ALLOWED_ROLES.contains(role)) {
+        if (!ALLOWED_ROLES.contains(userDto.getRole().trim())) {
             throw new IllegalArgumentException("El role debe ser Gerente, Supervisor o Vendedor");
         }
-
         validateUsernameAndPassword(userDto);
     }
 
@@ -121,7 +86,6 @@ public class UserService {
         if (userDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
         }
-
         validateUsernameAndPassword(userDto);
     }
 
@@ -129,7 +93,6 @@ public class UserService {
         if (userDto.getUsername() == null || userDto.getUsername().trim().isEmpty()) {
             throw new IllegalArgumentException("El username es obligatorio");
         }
-
         if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
             throw new IllegalArgumentException("La password es obligatoria");
         }
