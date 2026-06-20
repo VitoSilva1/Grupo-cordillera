@@ -37,6 +37,11 @@ spec:
                 configMapKeyRef:
                   name: grupo-cordillera-config
                   key: USER_API_URL
+            - name: REPORT_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: grupo-cordillera-config
+                  key: REPORT_API_URL
             - name: ALLOWED_ORIGINS
               valueFrom:
                 configMapKeyRef:
@@ -152,3 +157,54 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-service
+  namespace: grupo-cordillera
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report-service
+  template:
+    metadata:
+      labels:
+        app: report-service
+    spec:
+      containers:
+        - name: report-service
+          image: grupo-cordillera-report-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: report-service-config
+            - secretRef:
+                name: report-service-secret
+          readinessProbe:
+            httpGet:
+              path: /api/reports/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/reports/health
+              port: 8082
+            initialDelaySeconds: 60
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-service
+  namespace: grupo-cordillera
+spec:
+  selector:
+    app: report-service
+  ports:
+    - port: 8082
+      targetPort: 8082

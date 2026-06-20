@@ -8,6 +8,7 @@ stringData:
   AUTH_DB_PASSWORD: auth_pass
   KPIS_DB_PASSWORD: kpis_pass
   USER_DB_PASSWORD: user_pass
+  REPORT_DB_PASSWORD: report_pass
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -21,7 +22,10 @@ data:
   KPIS_DB_USER: kpis_user
   USER_DB_NAME: user_db
   USER_DB_USER: user_user
+  REPORT_DB_NAME: report_db
+  REPORT_DB_USER: report_user
   AUTH_API_URL: http://auth-service:8080/api/auth
   KPIS_API_URL: http://kpis-service:8081/api/kpis
   USER_API_URL: http://user-service:8082/api/users
+  REPORT_API_URL: http://report-service:8082/api/reports
   ALLOWED_ORIGINS: http://localhost,http://localhost:5173,http://grupo-cordillera.local
