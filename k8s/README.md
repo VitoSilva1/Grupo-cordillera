@@ -9,7 +9,6 @@ Los recursos compartidos quedan en `k8s/`, y cada microservicio Java mantiene su
 - `auth-service`
 - `user-service`
 - `kpis-service`
-- `auth-db`
 - `user-db`
 - `kpis-db`
 

@@ -98,31 +98,7 @@ app.post('/api/users', async (req, res, next) => {
     });
 
     const userPayload = await userResponse.json();
-    const userAlreadyExists = !userResponse.ok
-      && typeof userPayload.error === 'string'
-      && (userPayload.error.includes('usuario ya existe') || userPayload.error.includes('email ya existe'));
-
-    if (!userResponse.ok && !userAlreadyExists) {
-      return res.status(userResponse.status).json(userPayload);
-    }
-
-    const authResponse = await fetch(`${AUTH_API_URL}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        role: req.body.role,
-      }),
-    });
-
-    const authPayload = await authResponse.json();
-    if (!authResponse.ok) {
-      return res.status(authResponse.status).json(authPayload);
-    }
-
-    return res.status(201).json(userAlreadyExists ? authPayload : userPayload);
+    return res.status(userResponse.status).json(userPayload);
   } catch (error) {
     return next(error);
   }

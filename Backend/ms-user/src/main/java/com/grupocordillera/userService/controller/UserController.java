@@ -1,8 +1,10 @@
-package com.grupocordillera.userService.controller;
+package com.grupocordillera.userservice.controller;
 
-import com.grupocordillera.userService.dto.CreateUserRequest;
-import com.grupocordillera.userService.dto.UserResponse;
-import com.grupocordillera.userService.service.UserManagementService;
+import com.grupocordillera.userservice.dto.AuthenticateUserRequest;
+import com.grupocordillera.userservice.dto.AuthenticatedUserResponse;
+import com.grupocordillera.userservice.dto.CreateUserRequest;
+import com.grupocordillera.userservice.dto.UserResponse;
+import com.grupocordillera.userservice.service.UserManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +49,22 @@ public class UserController {
                 .map(UserResponse::from)
                 .toList();
         return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticateUserRequest request) {
+        try {
+            if (request == null) {
+                throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
+            }
+            return userManagementService.authenticate(request.login(), request.password())
+                    .map(AuthenticatedUserResponse::from)
+                    .<ResponseEntity<?>>map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(Map.of("error", "Credenciales invalidas")));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
     }
 
     @GetMapping("/{username}")

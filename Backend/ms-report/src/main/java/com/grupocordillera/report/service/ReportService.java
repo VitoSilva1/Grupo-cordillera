@@ -1,8 +1,8 @@
-package com.grupocordillera.userService.service;
+package com.grupocordillera.report.service;
 
-import com.grupocordillera.userService.dto.ReportRequest;
-import com.grupocordillera.userService.model.Report;
-import com.grupocordillera.userService.repository.ReportRepository;
+import com.grupocordillera.report.dto.ReportRequest;
+import com.grupocordillera.report.model.Report;
+import com.grupocordillera.report.repository.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

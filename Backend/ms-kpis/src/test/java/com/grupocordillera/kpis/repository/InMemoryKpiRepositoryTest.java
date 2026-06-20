@@ -75,12 +75,12 @@ class InMemoryKpiRepositoryTest {
 
     @Test
     void repositoryShouldExposeSummaryValues() {
-        assertEquals(145000000L, repository.getVentasTotales());
-        assertEquals(32.5, repository.getMargenUtilidad());
-        assertEquals(18, repository.getStockCritico());
-        assertEquals(5, repository.getReclamosActivos());
-        assertEquals(45000L, repository.getTicketPromedio());
-        assertEquals(94, repository.getSatisfaccionCliente());
+        assertEquals(145000000L, repository.getTotalSales());
+        assertEquals(32.5, repository.getProfitMargin());
+        assertEquals(18, repository.getCriticalStock());
+        assertEquals(5, repository.getActiveClaims());
+        assertEquals(45000L, repository.getAverageTicket());
+        assertEquals(94, repository.getCustomerSatisfaction());
     }
 
     @Test

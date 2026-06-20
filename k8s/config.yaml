@@ -5,7 +5,6 @@ metadata:
   namespace: grupo-cordillera
 type: Opaque
 stringData:
-  AUTH_DB_PASSWORD: auth_pass
   KPIS_DB_PASSWORD: kpis_pass
   USER_DB_PASSWORD: user_pass
   REPORT_DB_PASSWORD: report_pass
@@ -16,8 +15,6 @@ metadata:
   name: grupo-cordillera-config
   namespace: grupo-cordillera
 data:
-  AUTH_DB_NAME: auth_db
-  AUTH_DB_USER: auth_user
   KPIS_DB_NAME: kpis_db
   KPIS_DB_USER: kpis_user
   USER_DB_NAME: user_db

@@ -1,8 +1,8 @@
-package com.grupocordillera.userService.controller;
+package com.grupocordillera.report.controller;
 
-import com.grupocordillera.userService.dto.ReportRequest;
-import com.grupocordillera.userService.dto.ReportResponse;
-import com.grupocordillera.userService.service.ReportService;
+import com.grupocordillera.report.dto.ReportRequest;
+import com.grupocordillera.report.dto.ReportResponse;
+import com.grupocordillera.report.service.ReportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

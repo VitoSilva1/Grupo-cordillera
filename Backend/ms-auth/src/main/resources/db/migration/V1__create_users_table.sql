@@ -1,6 +1,0 @@
-CREATE TABLE users (
-    username VARCHAR(100) PRIMARY KEY,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    role VARCHAR(30) NOT NULL
-);

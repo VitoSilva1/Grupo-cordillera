@@ -30,8 +30,8 @@ class KpiControllerTest {
         var response = controller.getSummary();
 
         org.junit.jupiter.api.Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        org.junit.jupiter.api.Assertions.assertEquals(145000000L, response.getBody().ventasTotales());
-        org.junit.jupiter.api.Assertions.assertEquals(32.5, response.getBody().margenUtilidad());
+        org.junit.jupiter.api.Assertions.assertEquals(145000000L, response.getBody().totalSales());
+        org.junit.jupiter.api.Assertions.assertEquals(32.5, response.getBody().profitMargin());
     }
 
     @Test

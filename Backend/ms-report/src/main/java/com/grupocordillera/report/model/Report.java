@@ -1,4 +1,4 @@
-package com.grupocordillera.userService.model;
+package com.grupocordillera.report.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
