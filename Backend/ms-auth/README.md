@@ -1293,6 +1293,60 @@ flowchart LR
 
 ## 17. Ejemplos de uso
 
+## Swagger y OpenAPI
+
+Con Docker Compose levantado, la documentacion interactiva esta disponible en:
+
+```text
+http://localhost:9080/swagger-ui/index.html
+```
+
+La especificacion OpenAPI en JSON se puede validar con:
+
+```powershell
+Invoke-WebRequest http://localhost:9080/v3/api-docs -UseBasicParsing
+```
+
+Prueba rapida desde Swagger:
+
+1. Abrir `http://localhost:9080/swagger-ui/index.html`.
+2. Seleccionar `POST /api/auth/login`.
+3. Usar el body:
+
+```json
+{
+  "username": "gerente",
+  "password": "1234"
+}
+```
+
+La respuesta esperada es `200 OK`.
+
+Ejemplos para probar operaciones en Swagger:
+
+| Metodo | Endpoint | Como probar |
+|---|---|---|
+| GET | `/api/auth/health` | Presionar **Try it out** y luego **Execute**. Debe responder `200 OK`. |
+| GET | `/api/auth/users` | Presionar **Try it out** y luego **Execute** para listar usuarios desde `ms-user`. |
+| GET | `/api/auth/users/me` | Presionar **Try it out** y luego **Execute** para obtener un perfil de usuario. |
+| POST | `/api/auth/login` | Usar el JSON de login anterior. |
+| POST | `/api/auth/register` | Usar el JSON de registro siguiente. |
+
+Body para `POST /api/auth/register`:
+
+```json
+{
+  "email": "swagger.auth@cordillera.cl",
+  "username": "swaggerauth",
+  "password": "1234",
+  "firstName": "Swagger",
+  "lastName": "Auth",
+  "role": "Vendedor"
+}
+```
+
+Actualmente `ms-auth` no expone endpoints `PUT`; por eso no hay una prueba de actualizacion disponible en Swagger.
+
 ### Health
 
 ```bash

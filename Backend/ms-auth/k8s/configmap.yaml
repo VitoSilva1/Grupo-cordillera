@@ -4,5 +4,4 @@ metadata:
   name: auth-service-config
   namespace: grupo-cordillera
 data:
-  SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
-  SPRING_DATASOURCE_USERNAME: auth_user
+  USER_SERVICE_URL: http://user-service:8082/api/users

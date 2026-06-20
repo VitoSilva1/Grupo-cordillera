@@ -22,12 +22,12 @@ public class SummaryKpiStrategy implements KpiStrategy<KpiSummaryResponse> {
     @Override
     public KpiSummaryResponse execute() {
         return new KpiSummaryResponse(
-                repository.getVentasTotales(),
-                repository.getMargenUtilidad(),
-                repository.getStockCritico(),
-                repository.getReclamosActivos(),
-                repository.getTicketPromedio(),
-                repository.getSatisfaccionCliente()
+                repository.getTotalSales(),
+                repository.getProfitMargin(),
+                repository.getCriticalStock(),
+                repository.getActiveClaims(),
+                repository.getAverageTicket(),
+                repository.getCustomerSatisfaction()
         );
     }
 }

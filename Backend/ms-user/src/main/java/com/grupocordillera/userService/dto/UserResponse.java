@@ -1,6 +1,6 @@
-package com.grupocordillera.userService.dto;
+package com.grupocordillera.userservice.dto;
 
-import com.grupocordillera.userService.model.User;
+import com.grupocordillera.userservice.model.User;
 
 import java.time.LocalDateTime;
 

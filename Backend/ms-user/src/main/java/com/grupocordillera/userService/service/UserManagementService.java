@@ -1,8 +1,8 @@
-package com.grupocordillera.userService.service;
+package com.grupocordillera.userservice.service;
 
-import com.grupocordillera.userService.dto.CreateUserRequest;
-import com.grupocordillera.userService.model.User;
-import com.grupocordillera.userService.repository.UserRepository;
+import com.grupocordillera.userservice.dto.CreateUserRequest;
+import com.grupocordillera.userservice.model.User;
+import com.grupocordillera.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,6 +51,16 @@ public class UserManagementService {
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public Optional<User> authenticate(String login, String password) {
+        validateRequired(login, "El login es obligatorio");
+        validateRequired(password, "La password es obligatoria");
+
+        String normalizedLogin = login.trim();
+        return userRepository.findByUsername(normalizedLogin)
+                .or(() -> userRepository.findByEmailIgnoreCase(normalizedLogin))
+                .filter(user -> user.getPassword().equals(password));
     }
 
     private void validateCreateRequest(CreateUserRequest request) {

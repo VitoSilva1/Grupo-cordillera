@@ -42,7 +42,7 @@ class KpiQueryServiceTest {
     @Test
     void getSummaryShouldDelegateToSummaryStrategy() {
         KpiSummaryResponse result = queryService.getSummary();
-        assertEquals(145000000L, result.ventasTotales());
+        assertEquals(145000000L, result.totalSales());
     }
 
     @Test

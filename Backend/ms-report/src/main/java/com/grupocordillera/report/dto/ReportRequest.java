@@ -1,4 +1,4 @@
-package com.grupocordillera.userService.dto;
+package com.grupocordillera.report.dto;
 
 public class ReportRequest {
 

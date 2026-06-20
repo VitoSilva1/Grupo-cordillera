@@ -23,37 +23,37 @@ interface KpiCardStrategy {
 export const kpiCardStrategies: KpiCardStrategy[] = [
   {
     title: 'Ventas totales (Mes)',
-    getValue: (summary) => formatCurrency(summary.ventasTotales),
+    getValue: (summary) => formatCurrency(summary.totalSales),
     icon: <DollarSign size={22} />,
     trend: { value: '12%', isPositive: true },
   },
   {
     title: 'Margen de utilidad',
-    getValue: (summary) => `${summary.margenUtilidad}%`,
+    getValue: (summary) => `${summary.profitMargin}%`,
     icon: <TrendingUp size={22} />,
     trend: { value: '2.1%', isPositive: true },
   },
   {
     title: 'Stock crítico',
-    getValue: (summary) => summary.stockCritico,
+    getValue: (summary) => summary.criticalStock,
     icon: <PackageMinus size={22} />,
     trend: { value: '4', isPositive: false },
   },
   {
     title: 'Reclamos activos',
-    getValue: (summary) => summary.reclamosActivos,
+    getValue: (summary) => summary.activeClaims,
     icon: <AlertOctagon size={22} />,
     trend: { value: '1', isPositive: false },
   },
   {
     title: 'Ticket promedio',
-    getValue: (summary) => formatCurrency(summary.ticketPromedio),
+    getValue: (summary) => formatCurrency(summary.averageTicket),
     icon: <Receipt size={22} />,
     trend: { value: '5%', isPositive: true },
   },
   {
     title: 'Satisfacción cliente',
-    getValue: (summary) => `${summary.satisfaccionCliente}%`,
+    getValue: (summary) => `${summary.customerSatisfaction}%`,
     icon: <Smile size={22} />,
     trend: { value: '1%', isPositive: true },
   },

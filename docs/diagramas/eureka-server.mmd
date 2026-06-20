@@ -1,0 +1,11 @@
+flowchart TB
+  subgraph Eureka_Server["Eureka Server"]
+    A[Auth Service]
+    B[User Service]
+    C[Book Service]
+    D[Loan Service]
+  end
+  A --> Eureka_Server
+  B --> Eureka_Server
+  C --> Eureka_Server
+  D --> Eureka_Server

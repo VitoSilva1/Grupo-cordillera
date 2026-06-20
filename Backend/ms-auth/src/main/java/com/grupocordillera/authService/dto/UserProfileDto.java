@@ -1,4 +1,4 @@
-package com.grupocordillera.authService.dto;
+package com.grupocordillera.authservice.dto;
 
 public record UserProfileDto(
         String id,

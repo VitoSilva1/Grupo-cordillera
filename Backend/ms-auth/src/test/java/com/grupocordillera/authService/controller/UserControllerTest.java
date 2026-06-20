@@ -1,15 +1,14 @@
-package com.grupocordillera.authService.controller;
+package com.grupocordillera.authservice.controller;
 
-import com.grupocordillera.authService.dto.UserDto;
-import com.grupocordillera.authService.dto.UserProfileDto;
-import com.grupocordillera.authService.model.User;
-import com.grupocordillera.authService.repository.UserRepository;
-import com.grupocordillera.authService.service.UserService;
+import com.grupocordillera.authservice.client.UserClient;
+import com.grupocordillera.authservice.dto.UserDto;
+import com.grupocordillera.authservice.dto.UserProfileDto;
+import com.grupocordillera.authservice.model.User;
+import com.grupocordillera.authservice.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,18 +70,7 @@ class UserControllerTest {
         private User registeredUser = new User("u", "u@mail.com", "1234", "Gerente");
 
         StubUserService() {
-            super((UserRepository) Proxy.newProxyInstance(
-                    UserRepository.class.getClassLoader(),
-                    new Class[]{UserRepository.class},
-                    (proxy, method, args) -> {
-                        Class<?> returnType = method.getReturnType();
-                        if (returnType.equals(boolean.class)) return false;
-                        if (returnType.equals(long.class)) return 0L;
-                        if (returnType.equals(List.class)) return List.of();
-                        if (returnType.equals(Optional.class)) return Optional.empty();
-                        return null;
-                    }
-            ));
+            super(new StubUserClient());
         }
 
         @Override
@@ -97,6 +85,23 @@ class UserControllerTest {
 
         @Override
         public Optional<User> authenticateAndGetUser(UserDto userDto) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<User> findAll() {
+            return List.of();
+        }
+    }
+
+    private static class StubUserClient implements UserClient {
+        @Override
+        public User create(UserDto userDto) {
+            return new User(userDto.getUsername(), userDto.getEmail(), userDto.getPassword(), userDto.getRole());
+        }
+
+        @Override
+        public Optional<User> authenticate(String login, String password) {
             return Optional.empty();
         }
 
