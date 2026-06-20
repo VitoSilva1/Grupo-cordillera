@@ -1,0 +1,12 @@
+flowchart LR
+  Frontend["front-web2\nReact / TypeScript"] --> BFF["bff-service\nNode.js / Express"]
+
+  BFF --> Auth["/api/auth/*\nAUTH_API_URL"]
+  BFF --> Users["/api/users/*\nUSER_API_URL"]
+  BFF --> Kpis["/api/kpis/*\nKPIS_API_URL"]
+
+  Auth --> AuthService["ms-auth"]
+  Users --> UserService["ms-user"]
+  Kpis --> KpisService["ms-kpis"]
+
+  BFF --> Cors["CORS\nallowed frontend origins"]

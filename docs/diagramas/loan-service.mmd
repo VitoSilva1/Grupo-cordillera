@@ -1,9 +1,0 @@
-flowchart TB
-  subgraph Loan_Service["Loan Service"]
-    A[Cliente] --> B[Controller]
-    B --> C[Service]
-    C --> D[Repository]
-    D --> E[(Base de Datos)]
-    C --> F[User Service]
-    C --> G[Book Service]
-  end

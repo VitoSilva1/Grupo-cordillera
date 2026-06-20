@@ -1,7 +1,11 @@
 flowchart TB
-  subgraph User_Service["User Service"]
-    A[Cliente] --> B[Controller]
-    B --> C[Service]
-    C --> D[Repository]
-    D --> E[(Base de Datos)]
+  Client["ms-auth / BFF / API Consumer"] --> Controller["UserController\n/api/users"]
+
+  subgraph UserService["ms-user"]
+    Controller --> Service["UserManagementService\nbusiness rules"]
+    Service --> Repository["UserRepository\nSpring Data JPA"]
+    Controller --> Handler["RestExceptionHandler\nstandard errors"]
   end
+
+  Repository --> UserDb[("user_db\nPostgreSQL")]
+  UserDb --> Flyway["Flyway migrations\nusers schema + seed data"]
