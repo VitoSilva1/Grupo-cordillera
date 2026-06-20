@@ -1,0 +1,21 @@
+flowchart TB
+  Client["BFF / API Consumer"] --> Controller["KpiController\n/api/kpis"]
+
+  subgraph KpisService["ms-kpis"]
+    Controller --> QueryService["KpiQueryService"]
+    QueryService --> Factory["KpiStrategyFactory"]
+    Factory --> Summary["SummaryKpiStrategy"]
+    Factory --> Monthly["MonthlySalesStrategy"]
+    Factory --> Branches["BranchPerformanceStrategy"]
+    Factory --> Channels["SalesChannelStrategy"]
+    Factory --> Alerts["AlertsStrategy"]
+    Summary --> Repository["InMemoryKpiRepository\nJdbcTemplate"]
+    Monthly --> Repository
+    Branches --> Repository
+    Channels --> Repository
+    Alerts --> Repository
+    Controller --> Handler["RestExceptionHandler\nstandard errors"]
+  end
+
+  Repository --> KpisDb[("kpis_db\nPostgreSQL")]
+  KpisDb --> Flyway["Flyway migrations\nKPI schema + seed data"]
