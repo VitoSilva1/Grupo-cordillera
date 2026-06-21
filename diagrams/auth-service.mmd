@@ -1,8 +1,0 @@
-flowchart TB
-  subgraph Auth_Service["Auth Service"]
-    A[Cliente] --> B[Controller]
-    B --> C[Service]
-    C --> D[Repository]
-    D --> E[(Base de Datos)]
-    C --> F[JWT Service]
-  end
