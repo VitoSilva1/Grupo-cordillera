@@ -1,451 +1,159 @@
 {
-    "$schema":  "https://www.krakend.io/schema/v3.json",
-    "version":  3,
-    "name":  "grupo-cordillera-api-gateway",
-    "port":  8088,
-    "timeout":  "10s",
-    "cache_ttl":  "0s",
-    "extra_config":  {
-                         "security/cors":  {
-                                               "allow_origins":  [
-                                                                     "*"
-                                                                 ],
-                                               "allow_methods":  [
-                                                                     "GET",
-                                                                     "POST",
-                                                                     "PUT",
-                                                                     "PATCH",
-                                                                     "DELETE",
-                                                                     "OPTIONS"
-                                                                 ],
-                                               "allow_headers":  [
-                                                                     "Content-Type",
-                                                                     "Authorization"
-                                                                 ],
-                                               "allow_credentials":  false,
-                                               "max_age":  "12h"
-                                           }
-                     },
-    "endpoints":  [
-                      {
-                          "endpoint":  "/health",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/health",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/dashboard",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/dashboard",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/auth/login",
-                          "method":  "POST",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/auth/login",
-                                              "method":  "POST"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/auth/register",
-                          "method":  "POST",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/auth/register",
-                                              "method":  "POST"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/auth/users/me",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/auth/users/me",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/auth/public-key",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/auth/public-key",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/auth/users",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/auth/users",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/users",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/users",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/users",
-                          "method":  "POST",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/users",
-                                              "method":  "POST"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/users/authenticate",
-                          "method":  "POST",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/users/authenticate",
-                                              "method":  "POST"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/users/{username}",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/users/{username}",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/summary",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/summary",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/sales/monthly",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/sales/monthly",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/branches/performance",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/branches/performance",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/channels",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/channels",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/alerts",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/alerts",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/kpis/{type}",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/kpis/{type}",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/reports",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/reports",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/reports",
-                          "method":  "POST",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/reports",
-                                              "method":  "POST"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      },
-                      {
-                          "endpoint":  "/api/reports/{id}",
-                          "method":  "GET",
-                          "backend":  [
-                                          {
-                                              "host":  [
-                                                           "http://bff-service:8000"
-                                                       ],
-                                              "url_pattern":  "/api/reports/{id}",
-                                              "method":  "GET"
-                                          }
-                                      ],
-                          "input_headers":  [
-                                                "Content-Type",
-                                                "Authorization"
-                                            ],
-                          "input_query_strings":  [
-                                                      "*"
-                                                  ],
-                          "output_encoding":  "no-op"
-                      }
-                  ]
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "grupo-cordillera-api-gateway",
+  "port": 8088,
+  "timeout": "10s",
+  "cache_ttl": "0s",
+  "extra_config": {
+    "security/cors": {
+      "allow_origins": ["*"],
+      "allow_methods": ["GET", "POST", "OPTIONS"],
+      "allow_headers": ["Content-Type", "Authorization"],
+      "allow_credentials": false,
+      "max_age": "12h"
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/health",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/auth/login",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/auth/login",
+          "method": "POST"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/users",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/users",
+          "method": "POST"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/kpis/summary",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/kpis/summary",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/kpis/sales/monthly",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/kpis/sales/monthly",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/kpis/branches/performance",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/kpis/branches/performance",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/kpis/channels",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/kpis/channels",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/kpis/alerts",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/kpis/alerts",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/reports",
+      "method": "GET",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/reports",
+          "method": "GET"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    },
+    {
+      "endpoint": "/api/reports",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["http://bff-service:8000"],
+          "url_pattern": "/api/reports",
+          "method": "POST"
+        }
+      ],
+      "input_headers": ["Content-Type", "Authorization"],
+      "input_query_strings": ["*"],
+      "output_encoding": "no-op"
+    }
+  ]
 }

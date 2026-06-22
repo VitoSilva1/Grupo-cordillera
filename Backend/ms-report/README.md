@@ -11,15 +11,15 @@ Frontend
       -> report_db PostgreSQL
 ```
 
-`ms-report` es propietario de la informacion de reportes. El BFF puede consumir este servicio para armar el dashboard agregado.
+`ms-report` es propietario de la informacion de reportes. El BFF consume este servicio para listar y crear reportes desde la vista `/reportes`.
 
 ## Tabla tecnica
 
 | Item | Detalle |
 |---|---|
 | Lenguaje | Java 25 |
-| Framework | Spring Boot 4 |
-| Librerias | Spring Web, Spring Data JPA, Flyway, PostgreSQL Driver, Springdoc OpenAPI, JUnit, JaCoCo |
+| Framework | Spring Boot 4.0.6 |
+| Librerias | Spring Web, Spring Data JPA, Flyway, PostgreSQL Driver, Springdoc OpenAPI 2.8.9, JUnit, JaCoCo 0.8.13 |
 | Paquete base | `com.grupocordillera.report` |
 | Patrones | Layered Architecture, Repository, DTO, Global Exception Handler |
 | Base de datos | PostgreSQL `report_db` |
@@ -30,9 +30,11 @@ Frontend
 
 | Recurso | URL directa | URL via BFF |
 |---|---|---|
-| Health | `http://localhost:9083/api/reports/health` | `http://localhost:8000/api/reports/health` |
+| Health | `http://localhost:9083/api/reports/health` | No expuesto por BFF/Gateway en el escenario actual |
 | Swagger | `http://localhost:9083/swagger-ui/index.html` | No aplica |
-| Reports | `http://localhost:9083/api/reports` | `http://localhost:8000/api/reports` |
+| Listar reportes | `http://localhost:9083/api/reports` | `http://localhost:8000/api/reports` |
+| Crear reportes | `http://localhost:9083/api/reports` | `http://localhost:8000/api/reports` |
+| Buscar reporte por ID | `http://localhost:9083/api/reports/{id}` | No expuesto por BFF/Gateway en el escenario actual |
 
 ## Variables de entorno
 
@@ -65,6 +67,17 @@ Abrir:
 http://localhost:9083/swagger-ui/index.html
 ```
 
+### Pruebas en Swagger
+
+| Endpoint | Metodo | Como probar | Resultado esperado |
+|---|---|---|---|
+| `/api/reports/health` | `GET` | Click en `Try it out` y `Execute` | `{"status":"UP","service":"report-service"}` |
+| `/api/reports` | `GET` | Ejecutar sin body | Lista de reportes persistidos |
+| `/api/reports` | `POST` | Body con `title`, `description`, `reportType`, `status` | Reporte creado con status `201` |
+| `/api/reports/{id}` | `GET` | Parametro `id`, por ejemplo `1` | Reporte encontrado o `404` |
+
+En el escenario actual del frontend, `GET /api/reports` y `POST /api/reports` se exponen por KrakenD y se usan en la vista `/reportes`. `GET /api/reports/{id}` queda disponible para pruebas directas del microservicio, pero no como contrato publico del frontend.
+
 ## Endpoints y ejemplos
 
 ### Health check
@@ -78,7 +91,7 @@ curl http://localhost:9083/api/reports/health
 ```bash
 curl -X POST http://localhost:9083/api/reports \
   -H "Content-Type: application/json" \
-  -d "{\"title\":\"Reporte mensual\",\"description\":\"Resumen de ventas del mes\",\"reportType\":\"SALES\",\"status\":\"CREATED\"}"
+  -d "{\"title\":\"Reporte mensual\",\"description\":\"Resumen de ventas del mes\",\"reportType\":\"SALES\",\"status\":\"PENDING\"}"
 ```
 
 ### Listar reportes

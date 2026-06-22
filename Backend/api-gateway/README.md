@@ -19,11 +19,12 @@ No contiene logica de negocio. Su trabajo es exponer endpoints publicos, aplicar
 
 | Item | Detalle |
 |---|---|
-| Tecnologia | KrakenD |
+| Tecnologia | KrakenD 2.13 |
 | Rol | API Gateway |
 | Puerto local | `8088` |
 | Puerto interno | `8088` |
 | Backend principal | `bff-service:8000` |
+| Imagen base | `krakend:2.13` |
 | Configuracion | `krakend.json` |
 | Patrones | API Gateway, Reverse Proxy, Fachada |
 | Swagger | No aplica. Swagger esta en cada microservicio Java |
@@ -50,6 +51,21 @@ docker compose up --build
 ```
 
 ## Endpoints y ejemplos
+
+El gateway publica solo los endpoints usados por el frontend actual:
+
+| Metodo | Endpoint | Uso |
+|---|---|---|
+| `GET` | `/health` | Health check del gateway/BFF |
+| `POST` | `/api/auth/login` | Login |
+| `POST` | `/api/users` | Crear usuario |
+| `GET` | `/api/kpis/summary` | Tarjetas KPI |
+| `GET` | `/api/kpis/sales/monthly` | Grafico de ventas mensuales |
+| `GET` | `/api/kpis/branches/performance` | Grafico de sucursales |
+| `GET` | `/api/kpis/channels` | Grafico de canales |
+| `GET` | `/api/kpis/alerts` | Vista y tabla de alertas |
+| `GET` | `/api/reports` | Vista de reportes |
+| `POST` | `/api/reports` | Crear reportes desde la vista de reportes |
 
 ### Health check
 
@@ -79,6 +95,14 @@ curl http://localhost:8088/api/kpis/summary
 curl http://localhost:8088/api/reports
 ```
 
+### Crear reporte a traves del gateway
+
+```bash
+curl -X POST http://localhost:8088/api/reports \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Reporte mensual\",\"description\":\"Resumen de ventas\",\"reportType\":\"SALES\",\"status\":\"PENDING\"}"
+```
+
 ## Configuracion clave
 
 El archivo [krakend.json](./krakend.json) define:
@@ -87,7 +111,7 @@ El archivo [krakend.json](./krakend.json) define:
 - CORS para llamadas desde el frontend.
 - Propagacion de headers `Content-Type` y `Authorization`.
 - Propagacion de query strings.
-- Endpoints publicos `/api/auth/*`, `/api/users/*`, `/api/kpis/*`, `/api/reports/*` y `/api/dashboard`.
+- Endpoints publicos estrictamente usados por el frontend.
 - Backend comun `http://bff-service:8000`.
 
-KrakenD no queda configurado como proxy wildcard abierto; las rutas publicas se declaran explicitamente para que el contrato del gateway sea claro.
+KrakenD no queda configurado como proxy wildcard abierto; las rutas publicas se declaran explicitamente para que el contrato del gateway sea claro. Endpoints como `/api/dashboard`, `/api/auth/register`, `/api/auth/public-key`, `/api/users/authenticate`, `/api/kpis/{type}` y `/api/reports/{id}` no se exponen por el gateway en el escenario actual.

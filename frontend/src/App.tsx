@@ -6,6 +6,7 @@ import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
 import { CreateUser } from './views/CreateUser';
+import { ReportsView } from './views/ReportsView';
 import type { UserProfile } from './types/user';
 import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session-utils';
 import { useState } from 'react';
@@ -47,15 +48,10 @@ function App() {
             <Route path="/" component={Dashboard} />
             <Route path="/kpis" component={KpisView} />
             <Route path="/alertas" component={AlertsView} />
+            <Route path="/reportes" component={ReportsView} />
 
-            {/* Rutas no implementadas aún mostrarán un mensaje simple */}
-            <Route path="/reportes">
-              <div className="p-8 text-slate-500">Módulo de reportes en construcción...</div>
-            </Route>
-
-            {/* Catch-all route */}
             <Route>
-              <div className="p-8 text-slate-500">Página no encontrada</div>
+              <div className="p-8 text-slate-500">Pagina no encontrada</div>
             </Route>
           </Switch>
         </main>

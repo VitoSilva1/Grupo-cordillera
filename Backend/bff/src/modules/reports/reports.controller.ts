@@ -1,4 +1,4 @@
-import { All, Controller, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtGuard } from '../../common/guards/jwt.guard';
 import { ReportsService } from './reports.service';
@@ -8,13 +8,13 @@ import { ReportsService } from './reports.service';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
-  @All()
-  proxyRoot(@Req() request: Request, @Res() response: Response): Promise<void> {
+  @Get()
+  findAll(@Req() request: Request, @Res() response: Response): Promise<void> {
     return this.reportsService.proxy(request, response);
   }
 
-  @All('*')
-  proxy(@Req() request: Request, @Res() response: Response): Promise<void> {
+  @Post()
+  create(@Req() request: Request, @Res() response: Response): Promise<void> {
     return this.reportsService.proxy(request, response);
   }
 }
