@@ -26,7 +26,7 @@ Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway
 ```text
 Browser
   -> Frontend React/TypeScript
-  -> API Gateway Nginx
+  -> API Gateway KrakenD
   -> BFF Node.js/Express
   -> Microservicios Spring Boot
   -> PostgreSQL por servicio
@@ -39,7 +39,7 @@ El navegador consume rutas `/api/*`. El API Gateway enruta esas llamadas al BFF,
 | Componente | Ruta | Tecnologia | Responsabilidad |
 |---|---|---|---|
 | Frontend | `frontend/` | React, TypeScript, Vite, Tailwind CSS | UI, login, dashboard, KPIs y alertas |
-| API Gateway | `backend/api-gateway/` | Nginx | Entrada HTTP para `/api/*` |
+| API Gateway | `backend/api-gateway/` | KrakenD | Entrada HTTP para `/api/*` |
 | BFF | `backend/bff/` | Node.js, Express | Proxy y agregacion para el frontend |
 | Auth Service | `backend/ms-auth/` | Java, Spring Boot, JWT | Login, registro y emision de token |
 | User Service | `backend/ms-user/` | Java, Spring Boot, JPA, Flyway | Gestion y persistencia de usuarios |
