@@ -39,30 +39,6 @@ describe('BFF NestJS', () => {
       .expect({ status: 'UP', service: 'bff-service' });
   });
 
-  it('aggregates dashboard data', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockResolvedValueOnce(jsonResponse({ username: 'manager' }))
-      .mockResolvedValueOnce(jsonResponse({ totalSales: 100 }))
-      .mockResolvedValueOnce(jsonResponse([{ month: 'Jan', sales: 50 }]))
-      .mockResolvedValueOnce(jsonResponse([{ branch: 'Central', performance: 90 }]))
-      .mockResolvedValueOnce(jsonResponse([{ channel: 'Web', value: 40 }]))
-      .mockResolvedValueOnce(jsonResponse([{ id: '1', status: 'INFO' }]))
-      .mockResolvedValueOnce(jsonResponse([{ id: 1, title: 'Monthly' }]));
-
-    const response = await request(app.getHttpServer()).get('/api/dashboard').expect(200);
-
-    expect(response.body).toEqual({
-      user: { username: 'manager' },
-      summary: { totalSales: 100 },
-      sales: [{ month: 'Jan', sales: 50 }],
-      branches: [{ branch: 'Central', performance: 90 }],
-      channels: [{ channel: 'Web', value: 40 }],
-      alerts: [{ id: '1', status: 'INFO' }],
-      reports: [{ id: 1, title: 'Monthly' }],
-    });
-  });
-
   it('proxies report requests', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValueOnce(jsonResponse([{ id: 1 }]));
 
@@ -72,5 +48,74 @@ describe('BFF NestJS', () => {
       expect.stringContaining('/api/reports?type=latest'),
       expect.objectContaining({ method: 'GET' }),
     );
+  });
+
+  it('proxies report creation requests', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(jsonResponse({ id: 2 }, true, 201));
+
+    await request(app.getHttpServer())
+      .post('/api/reports')
+      .send({
+        title: 'Reporte mensual',
+        description: 'Resumen de ventas',
+        reportType: 'SALES',
+        status: 'PENDING',
+      })
+      .expect(201);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/reports'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('proxies login requests', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(jsonResponse({ accessToken: 'token' }));
+
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ username: 'vendedor', password: '1234' })
+      .expect(200);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/login'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('proxies user creation requests', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(jsonResponse({ id: 1 }, true, 201));
+
+    await request(app.getHttpServer())
+      .post('/api/users')
+      .send({
+        username: 'demo',
+        email: 'demo@cordillera.cl',
+        password: '1234',
+        firstName: 'Demo',
+        lastName: 'User',
+        role: 'Vendedor',
+      })
+      .expect(201);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/users'),
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
+
+  it('proxies KPI summary requests', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValueOnce(jsonResponse({ ventasTotales: 100 }));
+
+    await request(app.getHttpServer()).get('/api/kpis/summary').expect(200);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/kpis/summary'),
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
+
+  it('does not expose the removed dashboard aggregate endpoint', async () => {
+    await request(app.getHttpServer()).get('/api/dashboard').expect(404);
   });
 });

@@ -32,19 +32,19 @@ Browser
   -> PostgreSQL por servicio
 ```
 
-El navegador consume rutas `/api/*`. El API Gateway enruta esas llamadas al BFF, y el BFF actua como fachada hacia los microservicios internos. El endpoint `/api/dashboard` agrega datos de KPIs en una respuesta unica.
+El navegador consume rutas `/api/*`. El API Gateway enruta esas llamadas al BFF, y el BFF actua como fachada hacia los microservicios internos. En el escenario actual se exponen solo las rutas usadas por la UI: login, creacion de usuario, KPIs, listado de reportes y creacion de reportes.
 
 ## Componentes
 
 | Componente | Ruta | Tecnologia | Responsabilidad |
 |---|---|---|---|
-| Frontend | `frontend/` | React, TypeScript, Vite, Tailwind CSS | UI, login, dashboard, KPIs y alertas |
-| API Gateway | `backend/api-gateway/` | KrakenD | Entrada HTTP para `/api/*` |
-| BFF | `backend/bff/` | Node.js, Express | Proxy y agregacion para el frontend |
-| Auth Service | `backend/ms-auth/` | Java, Spring Boot, JWT | Login, registro y emision de token |
-| User Service | `backend/ms-user/` | Java, Spring Boot, JPA, Flyway | Gestion y persistencia de usuarios |
-| KPIs Service | `backend/ms-kpis/` | Java, Spring Boot, JDBC, Flyway | Indicadores del dashboard |
-| Report Service | `backend/ms-report/` | Java, Spring Boot, JPA, Flyway | Gestion de reportes |
+| Frontend | `frontend/` | React 19.2.5, TypeScript 6.0.2, Vite 8.0.10, Tailwind CSS 4.2.4, Nginx 1.27 | UI, login, dashboard, KPIs, reportes y alertas |
+| API Gateway | `backend/api-gateway/` | KrakenD 2.13 | Entrada HTTP para `/api/*` |
+| BFF | `backend/bff/` | Node.js 22, NestJS 11.1.9, Express | Proxy para el frontend |
+| Auth Service | `backend/ms-auth/` | Java 25, Spring Boot 4.0.6, Nimbus JOSE JWT 10.5 | Login y emision de token |
+| User Service | `backend/ms-user/` | Java 25, Spring Boot 4.0.6, JPA, Flyway, PostgreSQL Driver | Gestion y persistencia de usuarios |
+| KPIs Service | `backend/ms-kpis/` | Java 25, Spring Boot 4.0.6, JDBC, Flyway, PostgreSQL Driver | Indicadores del dashboard |
+| Report Service | `backend/ms-report/` | Java 25, Spring Boot 4.0.6, JPA, Flyway, PostgreSQL Driver | Gestion de reportes |
 
 ## Requisitos cubiertos
 

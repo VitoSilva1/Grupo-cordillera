@@ -20,8 +20,8 @@ ms-auth
 | Item | Detalle |
 |---|---|
 | Lenguaje | Java 25 |
-| Framework | Spring Boot 4 |
-| Librerias | Spring Web, Spring Data JPA, Flyway, PostgreSQL Driver, Springdoc OpenAPI, JUnit, JaCoCo |
+| Framework | Spring Boot 4.0.6 |
+| Librerias | Spring Web, Spring Data JPA, Flyway, PostgreSQL Driver, Springdoc OpenAPI 2.8.9, JUnit, JaCoCo 0.8.13 |
 | Paquete base | `com.grupocordillera.userservice` |
 | Patrones | Layered Architecture, Repository, DTO, Global Exception Handler |
 | Base de datos | PostgreSQL `user_db` |
@@ -32,9 +32,10 @@ ms-auth
 
 | Recurso | URL directa | URL via BFF |
 |---|---|---|
-| Health | `http://localhost:9082/api/users/health` | `http://localhost:8000/api/users/health` |
+| Health | `http://localhost:9082/api/users/health` | No expuesto por BFF/Gateway en el escenario actual |
 | Swagger | `http://localhost:9082/swagger-ui/index.html` | No aplica |
-| Users | `http://localhost:9082/api/users` | `http://localhost:8000/api/users` |
+| Crear usuario | `http://localhost:9082/api/users` | `http://localhost:8000/api/users` |
+| Listar/buscar/autenticar | `http://localhost:9082/api/users...` | No expuesto por BFF/Gateway en el escenario actual |
 
 ## Variables de entorno
 
@@ -66,6 +67,18 @@ Abrir:
 ```text
 http://localhost:9082/swagger-ui/index.html
 ```
+
+### Pruebas en Swagger
+
+| Endpoint | Metodo | Como probar | Resultado esperado |
+|---|---|---|---|
+| `/api/users/health` | `GET` | Click en `Try it out` y `Execute` | `{"status":"UP","service":"user-service"}` |
+| `/api/users` | `POST` | Body con `username`, `email`, `password`, `firstName`, `lastName`, `role` | Usuario creado con status `201` |
+| `/api/users` | `GET` | Ejecutar sin body | Lista de usuarios persistidos |
+| `/api/users/authenticate` | `POST` | Body: `{"login":"vendedor","password":"1234"}` | Usuario autenticado o `401` si falla |
+| `/api/users/{username}` | `GET` | Parametro `username`, por ejemplo `vendedor` | Usuario encontrado o `404` |
+
+En el escenario actual del frontend, solo `POST /api/users` se expone por KrakenD. `GET /api/users`, `/authenticate` y `/{username}` quedan como endpoints directos/internos del microservicio.
 
 ## Endpoints y ejemplos
 

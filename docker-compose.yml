@@ -198,6 +198,7 @@ services:
         VITE_USERS_API_URL: /api/auth
         VITE_USER_API_URL: /api/users
         VITE_KPIS_API_URL: /api/kpis
+        VITE_REPORTS_API_URL: /api/reports
     image: grupo-cordillera-front-web2:latest
     container_name: grupo-cordillera-front
     restart: unless-stopped
