@@ -18,8 +18,8 @@ Frontend
 | Item | Detalle |
 |---|---|
 | Lenguaje | Java 25 |
-| Framework | Spring Boot 4 |
-| Librerias | Spring Web, Spring JDBC, Flyway, PostgreSQL Driver, Springdoc OpenAPI, JUnit, JaCoCo |
+| Framework | Spring Boot 4.0.6 |
+| Librerias | Spring Web, Spring JDBC, Flyway, PostgreSQL Driver, Springdoc OpenAPI 2.8.9, JUnit, JaCoCo 0.8.13 |
 | Paquete base | `com.grupocordillera.kpis` |
 | Patrones | Layered Architecture, Strategy, Factory, Repository, DTO, Global Exception Handler |
 | Base de datos | PostgreSQL `kpis_db` |
@@ -30,10 +30,9 @@ Frontend
 
 | Recurso | URL directa | URL via BFF |
 |---|---|---|
-| Health | `http://localhost:9081/api/kpis/health` | `http://localhost:8000/api/kpis/health` |
+| Health | `http://localhost:9081/api/kpis/health` | No expuesto por BFF/Gateway en el escenario actual |
 | Swagger | `http://localhost:9081/swagger-ui/index.html` | No aplica |
 | Summary | `http://localhost:9081/api/kpis/summary` | `http://localhost:8000/api/kpis/summary` |
-| Dashboard agregado | No aplica | `http://localhost:8000/api/dashboard` |
 
 ## Variables de entorno
 
@@ -65,6 +64,20 @@ Abrir:
 ```text
 http://localhost:9081/swagger-ui/index.html
 ```
+
+### Pruebas en Swagger
+
+| Endpoint | Metodo | Como probar | Resultado esperado |
+|---|---|---|---|
+| `/api/kpis/health` | `GET` | Click en `Try it out` y `Execute` | `{"status":"UP","service":"kpis-service"}` |
+| `/api/kpis/summary` | `GET` | Ejecutar sin body | Resumen con ventas, margen, stock, reclamos, ticket y satisfaccion |
+| `/api/kpis/sales/monthly` | `GET` | Ejecutar sin body | Lista de ventas mensuales |
+| `/api/kpis/branches/performance` | `GET` | Ejecutar sin body | Lista de desempeno por sucursal |
+| `/api/kpis/channels` | `GET` | Ejecutar sin body | Distribucion de ventas por canal |
+| `/api/kpis/alerts` | `GET` | Ejecutar sin body | Lista de alertas |
+| `/api/kpis/{type}` | `GET` | Parametro `type`: `SUMMARY`, `MONTHLY_SALES`, `BRANCH_PERFORMANCE`, `SALES_CHANNELS` o `ALERTS` | Respuesta segun estrategia KPI |
+
+En el escenario actual del frontend, se exponen por KrakenD los endpoints especificos: `/summary`, `/sales/monthly`, `/branches/performance`, `/channels` y `/alerts`. El endpoint generico `/{type}` queda disponible solo directo en el microservicio.
 
 ## Endpoints y ejemplos
 
@@ -118,12 +131,6 @@ Ejemplo:
 
 ```bash
 curl http://localhost:9081/api/kpis/SUMMARY
-```
-
-### Dashboard agregado desde el BFF
-
-```bash
-curl http://localhost:8000/api/dashboard
 ```
 
 ## Tests y cobertura

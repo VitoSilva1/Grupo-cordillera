@@ -19,7 +19,6 @@ El BFF no debe tener logica pesada de negocio. Su responsabilidad es:
 
 - Validar formato basico del token bearer.
 - Enrutar peticiones hacia microservicios.
-- Agregar respuestas cuando el frontend necesita una vista compuesta.
 - Manejar errores de integracion.
 - Mantener al frontend desacoplado de las URLs internas.
 
@@ -29,10 +28,11 @@ El BFF no debe tener logica pesada de negocio. Su responsabilidad es:
 |---|---|
 | Lenguaje | TypeScript |
 | Runtime | Node.js 22 |
-| Framework | NestJS 11 |
-| Librerias | `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`, `reflect-metadata`, `rxjs` |
-| Testing | Jest, ts-jest, Supertest, `@nestjs/testing` |
-| Patrones | Backend for Frontend, API Facade, Proxy, Aggregator, Domain Modules, HTTP Client Adapter |
+| Framework | NestJS 11.1.9 |
+| TypeScript | 5.9.3 |
+| Librerias | `@nestjs/common` 11.1.9, `@nestjs/core` 11.1.9, `@nestjs/platform-express` 11.1.9, `reflect-metadata` 0.2.2, `rxjs` 7.8.2 |
+| Testing | Jest 30.4.2, ts-jest 29.4.6, Supertest 7.2.2, `@nestjs/testing` 11.1.9 |
+| Patrones | Backend for Frontend, API Facade, Proxy, Domain Modules, HTTP Client Adapter |
 | Swagger | No aplica en el BFF. Swagger esta en los microservicios Java |
 | Cobertura | Jest configurado con minimo 60% global |
 
@@ -63,11 +63,10 @@ src/
 | Recurso | URL |
 |---|---|
 | Health check | `http://localhost:8000/health` |
-| Dashboard agregado | `http://localhost:8000/api/dashboard` |
-| Auth via BFF | `http://localhost:8000/api/auth/*` |
-| Users via BFF | `http://localhost:8000/api/users/*` |
-| KPIs via BFF | `http://localhost:8000/api/kpis/*` |
-| Reports via BFF | `http://localhost:8000/api/reports/*` |
+| Auth login | `http://localhost:8000/api/auth/login` |
+| Crear usuario | `http://localhost:8000/api/users` |
+| KPIs via BFF | `http://localhost:8000/api/kpis/...` |
+| Reports via BFF | `http://localhost:8000/api/reports` |
 
 ## Variables de entorno
 
@@ -110,6 +109,21 @@ npm test
 
 ## Endpoints y ejemplos
 
+El BFF expone solo los endpoints usados por el frontend actual:
+
+| Metodo | Endpoint |
+|---|---|
+| `GET` | `/health` |
+| `POST` | `/api/auth/login` |
+| `POST` | `/api/users` |
+| `GET` | `/api/kpis/summary` |
+| `GET` | `/api/kpis/sales/monthly` |
+| `GET` | `/api/kpis/branches/performance` |
+| `GET` | `/api/kpis/channels` |
+| `GET` | `/api/kpis/alerts` |
+| `GET` | `/api/reports` |
+| `POST` | `/api/reports` |
+
 ### Health check
 
 ```bash
@@ -143,21 +157,16 @@ curl -X POST http://localhost:8000/api/users \
   -d "{\"username\":\"demo\",\"email\":\"demo@cordillera.cl\",\"password\":\"1234\",\"firstName\":\"Demo\",\"lastName\":\"User\",\"role\":\"Vendedor\"}"
 ```
 
-### Consultar dashboard agregado
-
-```bash
-curl http://localhost:8000/api/dashboard
-```
-
-El BFF arma una respuesta con:
-
-- Usuario actual desde `ms-auth`.
-- Resumen de KPIs desde `ms-kpis`.
-- Ventas, sucursales, canales y alertas desde `ms-kpis`.
-- Reportes desde `ms-report`.
-
 ### Consultar reportes
 
 ```bash
 curl http://localhost:8000/api/reports
+```
+
+### Crear reporte
+
+```bash
+curl -X POST http://localhost:8000/api/reports \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Reporte mensual\",\"description\":\"Resumen de ventas\",\"reportType\":\"SALES\",\"status\":\"PENDING\"}"
 ```
