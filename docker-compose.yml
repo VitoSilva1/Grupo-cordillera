@@ -58,7 +58,7 @@ services:
 
   auth-service:
     build:
-      context: ./Backend/ms-auth
+      context: ./backend/ms-auth
     image: grupo-cordillera-auth-service:latest
     container_name: grupo-cordillera-auth
     restart: unless-stopped
@@ -78,7 +78,7 @@ services:
 
   kpis-service:
     build:
-      context: ./Backend/ms-kpis
+      context: ./backend/ms-kpis
     image: grupo-cordillera-kpis-service:latest
     container_name: grupo-cordillera-kpis
     restart: unless-stopped
@@ -100,7 +100,7 @@ services:
 
   user-service:
     build:
-      context: ./Backend/ms-user
+      context: ./backend/ms-user
     image: grupo-cordillera-user-service:latest
     container_name: grupo-cordillera-user
     restart: unless-stopped
@@ -122,7 +122,7 @@ services:
 
   report-service:
     build:
-      context: ./Backend/ms-report
+      context: ./backend/ms-report
     image: grupo-cordillera-report-service:latest
     container_name: grupo-cordillera-report
     restart: unless-stopped
@@ -144,7 +144,7 @@ services:
 
   bff-service:
     build:
-      context: ./Backend/bff-service
+      context: ./backend/bff
     image: grupo-cordillera-bff-service:latest
     container_name: grupo-cordillera-bff
     restart: unless-stopped
@@ -153,6 +153,7 @@ services:
       AUTH_API_URL: http://auth-service:8080/api/auth
       KPIS_API_URL: http://kpis-service:8081/api/kpis
       USER_API_URL: http://user-service:8082/api/users
+      REPORT_API_URL: http://report-service:8082/api/reports
       ALLOWED_ORIGINS: http://localhost:5173
     depends_on:
       auth-service:
@@ -160,6 +161,8 @@ services:
       kpis-service:
         condition: service_healthy
       user-service:
+        condition: service_healthy
+      report-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health >/dev/null 2>&1 || curl -fsS http://localhost:8000/health >/dev/null"]
@@ -172,7 +175,7 @@ services:
 
   api-gateway:
     build:
-      context: ./Backend/api-gateway
+      context: ./backend/api-gateway
     image: grupo-cordillera-api-gateway:latest
     container_name: grupo-cordillera-api-gateway
     restart: unless-stopped

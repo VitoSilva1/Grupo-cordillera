@@ -1,8 +1,0 @@
-flowchart TB
-  subgraph API_Gateway["API Gateway"]
-    A[Cliente] --> B[API Gateway]
-    B --> C[Auth Service]
-    B --> D[User Service]
-    B --> E[Book Service]
-    B --> F[Loan Service]
-  end
