@@ -104,7 +104,8 @@ npm test
 
 La carpeta `docs/` contiene exclusivamente documentos de entrega y fuentes de diagramas:
 
-- `docs/report.pdf`
+- `docs/repore del proyecto.pdf`
 - `docs/presentation.pdf`
 - `docs/caso-estudio.pdf`
+- `docs/coverage-report.pdf`
 - `docs/diagramas/*.mmd`
