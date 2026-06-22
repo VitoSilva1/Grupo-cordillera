@@ -1,7 +1,7 @@
-FROM nginx:1.27-alpine
+FROM krakend:2.13
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY krakend.json /etc/krakend/krakend.json
 
 EXPOSE 8088
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["run", "-c", "/etc/krakend/krakend.json"]

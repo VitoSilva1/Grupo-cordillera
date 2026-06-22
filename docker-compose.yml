@@ -183,7 +183,7 @@ services:
       bff-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8088/health || exit 1"]
+      test: ["CMD", "krakend", "check", "-c", "/etc/krakend/krakend.json"]
       interval: 10s
       timeout: 5s
       retries: 10
