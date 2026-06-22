@@ -1,6 +1,6 @@
 # api-gateway - Grupo Cordillera
 
-API Gateway HTTP del proyecto. Esta hecho con Nginx y es la puerta de entrada para todas las rutas `/api/*`.
+API Gateway HTTP del proyecto. Esta hecho con KrakenD y es la puerta de entrada para las rutas `/api/*`.
 
 ## Que hace
 
@@ -13,18 +13,19 @@ Frontend
       -> ms-auth / ms-user / ms-kpis / ms-report
 ```
 
-No contiene logica de negocio. Su trabajo es enrutar, conservar headers importantes y responder health checks.
+No contiene logica de negocio. Su trabajo es exponer endpoints publicos, aplicar configuracion transversal de CORS y delegar las solicitudes al BFF.
 
 ## Tabla tecnica
 
 | Item | Detalle |
 |---|---|
-| Tecnologia | Nginx |
-| Rol | API Gateway / Reverse Proxy |
+| Tecnologia | KrakenD |
+| Rol | API Gateway |
 | Puerto local | `8088` |
 | Puerto interno | `8088` |
-| Upstream | `bff-service:8000` |
-| Patrones | API Gateway, Reverse Proxy |
+| Backend principal | `bff-service:8000` |
+| Configuracion | `krakend.json` |
+| Patrones | API Gateway, Reverse Proxy, Fachada |
 | Swagger | No aplica. Swagger esta en cada microservicio Java |
 
 ## URLs importantes
@@ -56,14 +57,7 @@ docker compose up --build
 curl http://localhost:8088/health
 ```
 
-Respuesta esperada:
-
-```json
-{
-  "status": "UP",
-  "service": "api-gateway"
-}
-```
+El endpoint `/health` del gateway esta declarado en KrakenD y delega al health check del BFF.
 
 ### Probar login a traves del gateway
 
@@ -87,9 +81,13 @@ curl http://localhost:8088/api/reports
 
 ## Configuracion clave
 
-El archivo [nginx.conf](./nginx.conf) define:
+El archivo [krakend.json](./krakend.json) define:
 
-- `location = /health`: health check del gateway.
-- `location /api/`: proxy hacia el BFF.
-- Headers `X-Real-IP`, `X-Forwarded-For` y `X-Forwarded-Proto`.
-- Headers CORS para permitir llamadas desde el frontend.
+- Puerto de escucha `8088`.
+- CORS para llamadas desde el frontend.
+- Propagacion de headers `Content-Type` y `Authorization`.
+- Propagacion de query strings.
+- Endpoints publicos `/api/auth/*`, `/api/users/*`, `/api/kpis/*`, `/api/reports/*` y `/api/dashboard`.
+- Backend comun `http://bff-service:8000`.
+
+KrakenD no queda configurado como proxy wildcard abierto; las rutas publicas se declaran explicitamente para que el contrato del gateway sea claro.
