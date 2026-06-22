@@ -56,11 +56,12 @@ El `docker-compose.yml` construye las imagenes desde la estructura actual del mo
 
 | Servicio       | Build context                 | Imagen usada por Kubernetes                     |
 |----------------|-------------------------------|-------------------------------------------------|
-| auth-service   | `./Backend/ms-auth`           | `grupo-cordillera-auth-service:latest`          |
-| kpis-service   | `./Backend/ms-kpis`           | `grupo-cordillera-kpis-service:latest`          |
-| user-service   | `./Backend/ms-user`           | `grupo-cordillera-user-service:latest`          |
-| bff-service    | `./Backend/bff-service`       | `grupo-cordillera-bff-service:latest`           |
-| api-gateway    | `./Backend/api-gateway`       | `grupo-cordillera-api-gateway:latest`           |
+| auth-service   | `./backend/ms-auth`           | `grupo-cordillera-auth-service:latest`          |
+| kpis-service   | `./backend/ms-kpis`           | `grupo-cordillera-kpis-service:latest`          |
+| user-service   | `./backend/ms-user`           | `grupo-cordillera-user-service:latest`          |
+| report-service | `./backend/ms-report`         | `grupo-cordillera-report-service:latest`        |
+| bff-service    | `./backend/bff`               | `grupo-cordillera-bff-service:latest`           |
+| api-gateway    | `./backend/api-gateway`       | `grupo-cordillera-api-gateway:latest`           |
 | front-web2     | `./frontend`                  | `grupo-cordillera-front-web2:latest`            |
 
 Los manifiestos de `k8s/` no necesitan rutas a carpetas de codigo porque despliegan imagenes ya construidas. Docker Desktop Kubernetes puede usar esas imagenes locales porque quedan en el mismo Docker Engine.
@@ -71,9 +72,10 @@ Los manifiestos de `k8s/` no necesitan rutas a carpetas de codigo porque desplie
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/config.yaml
 kubectl apply -f k8s/databases.yaml
-kubectl apply -f Backend/ms-auth/k8s/
-kubectl apply -f Backend/ms-kpis/k8s/
-kubectl apply -f Backend/ms-user/k8s/
+kubectl apply -f backend/ms-auth/k8s/
+kubectl apply -f backend/ms-kpis/k8s/
+kubectl apply -f backend/ms-user/k8s/
+kubectl apply -f backend/ms-report/k8s/
 kubectl apply -f k8s/apps.yaml
 kubectl apply -f k8s/ingress.yaml
 ```

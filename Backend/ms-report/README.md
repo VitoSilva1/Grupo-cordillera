@@ -1,64 +1,109 @@
-# ms-report
+# ms-report - Grupo Cordillera
 
-Microservice responsible for report management. It owns `report_db` and exposes report creation and query endpoints.
+Microservicio de reportes. Permite crear, listar y buscar reportes almacenados en su propia base PostgreSQL.
 
-## Run Locally
+## Como funciona
 
-```powershell
+```text
+Frontend
+  -> BFF /api/reports/*
+    -> ms-report
+      -> report_db PostgreSQL
+```
+
+`ms-report` es propietario de la informacion de reportes. El BFF puede consumir este servicio para armar el dashboard agregado.
+
+## Tabla tecnica
+
+| Item | Detalle |
+|---|---|
+| Lenguaje | Java 25 |
+| Framework | Spring Boot 4 |
+| Librerias | Spring Web, Spring Data JPA, Flyway, PostgreSQL Driver, Springdoc OpenAPI, JUnit, JaCoCo |
+| Paquete base | `com.grupocordillera.report` |
+| Patrones | Layered Architecture, Repository, DTO, Global Exception Handler |
+| Base de datos | PostgreSQL `report_db` |
+| Swagger | `http://localhost:9083/swagger-ui/index.html` |
+| OpenAPI JSON | `http://localhost:9083/v3/api-docs` |
+
+## URLs importantes
+
+| Recurso | URL directa | URL via BFF |
+|---|---|---|
+| Health | `http://localhost:9083/api/reports/health` | `http://localhost:8000/api/reports/health` |
+| Swagger | `http://localhost:9083/swagger-ui/index.html` | No aplica |
+| Reports | `http://localhost:9083/api/reports` | `http://localhost:8000/api/reports` |
+
+## Variables de entorno
+
+| Variable | Valor por defecto |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5436/report_db` |
+| `SPRING_DATASOURCE_USERNAME` | `report_user` |
+| `SPRING_DATASOURCE_PASSWORD` | `report_pass` |
+
+## Como ejecutar
+
+Desde la raiz:
+
+```bash
 docker compose up --build report-db report-service
 ```
 
-## Technical Table
+Local directo:
 
-| Item | Value |
-|---|---|
-| Language | Java 25 |
-| Framework | Spring Boot 4 |
-| Libraries | Spring Web MVC, Spring Data JPA, Flyway, PostgreSQL JDBC, Springdoc OpenAPI, JaCoCo |
-| Database pattern | Database per Service |
-| Database | PostgreSQL `report_db` |
-| Design patterns | Layered architecture, Repository, DTO |
+```bash
+cd backend/ms-report
+mvn spring-boot:run
+```
 
-## Swagger and OpenAPI
+## Swagger
 
-With Docker Compose running, Swagger UI is available at:
+Abrir:
 
 ```text
 http://localhost:9083/swagger-ui/index.html
 ```
 
-The OpenAPI JSON specification can be validated with:
+## Endpoints y ejemplos
 
-```powershell
-Invoke-WebRequest http://localhost:9083/v3/api-docs -UseBasicParsing
+### Health check
+
+```bash
+curl http://localhost:9083/api/reports/health
 ```
 
-Quick endpoint checks:
+### Crear reporte
 
-```powershell
-Invoke-RestMethod http://localhost:9083/api/reports
+```bash
+curl -X POST http://localhost:9083/api/reports \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Reporte mensual\",\"description\":\"Resumen de ventas del mes\",\"reportType\":\"SALES\",\"status\":\"CREATED\"}"
 ```
 
-## Swagger Test Examples
+### Listar reportes
 
-Open `http://localhost:9083/swagger-ui/index.html`, press **Try it out**, fill the required values, and press **Execute**.
-
-| Method | Endpoint | How to test |
-|---|---|---|
-| GET | `/api/reports/health` | Execute without parameters. Expected response: `200 OK`. |
-| GET | `/api/reports` | Execute without parameters to list reports. |
-| GET | `/api/reports/{id}` | Use an existing report id, for example `1` if seeded data exists. |
-| POST | `/api/reports` | Use the create-report JSON below. Expected response: `201 Created`. |
-
-Body for `POST /api/reports`:
-
-```json
-{
-  "title": "Reporte Swagger",
-  "description": "Reporte creado desde Swagger UI",
-  "reportType": "OPERACIONAL",
-  "status": "GENERADO"
-}
+```bash
+curl http://localhost:9083/api/reports
 ```
 
-`ms-report` does not currently expose `PUT` endpoints. Report updates would require implementing an update endpoint first.
+### Buscar reporte por ID
+
+```bash
+curl http://localhost:9083/api/reports/1
+```
+
+### Probar via BFF
+
+```bash
+curl http://localhost:8000/api/reports
+```
+
+## Tests y cobertura
+
+```bash
+cd backend/ms-report
+mvn verify
+```
+
+JaCoCo valida minimo 60% de cobertura de lineas.
