@@ -1,6 +1,6 @@
 flowchart LR
   Browser["Browser"] --> Frontend["front-web2\nReact / TypeScript\nlocalhost:5173"]
-  Frontend --> Gateway["api-gateway\nNginx\nlocalhost:8088"]
+  Frontend --> Gateway["api-gateway\Krakend\nlocalhost:8088"]
   Gateway --> BFF["bff-service\nNode.js / Express\nlocalhost:8000"]
 
   BFF --> Auth["ms-auth\nSpring Boot\nlocalhost:9080"]
