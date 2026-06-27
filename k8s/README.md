@@ -69,13 +69,19 @@ Los manifiestos de `k8s/` no necesitan rutas a carpetas de codigo porque desplie
 ## 4. Aplicar manifiestos
 
 ```powershell
+kubectl apply -k .
+```
+
+Si prefieres hacerlo por etapas:
+
+```powershell
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/config.yaml
 kubectl apply -f k8s/databases.yaml
-kubectl apply -f backend/ms-auth/k8s/
-kubectl apply -f backend/ms-kpis/k8s/
-kubectl apply -f backend/ms-user/k8s/
-kubectl apply -f backend/ms-report/k8s/
+kubectl apply -f Backend/ms-auth/k8s/
+kubectl apply -f Backend/ms-kpis/k8s/
+kubectl apply -f Backend/ms-user/k8s/
+kubectl apply -f Backend/ms-report/k8s/
 kubectl apply -f k8s/apps.yaml
 kubectl apply -f k8s/ingress.yaml
 ```

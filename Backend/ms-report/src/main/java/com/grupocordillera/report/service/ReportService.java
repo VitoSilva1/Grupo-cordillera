@@ -24,10 +24,10 @@ public class ReportService {
         validateRequest(request);
 
         Report report = new Report();
-        report.setTitle(request.getTitle().trim());
-        report.setDescription(normalizeDescription(request.getDescription()));
-        report.setReportType(request.getReportType().trim());
-        report.setStatus(resolveStatus(request.getStatus()));
+        report.setTitle(request.title().trim());
+        report.setDescription(normalizeDescription(request.description()));
+        report.setReportType(request.reportType().trim());
+        report.setStatus(resolveStatus(request.status()));
 
         return reportRepository.save(report);
     }
@@ -48,11 +48,11 @@ public class ReportService {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
         }
 
-        validateRequired(request.getTitle(), "El titulo es obligatorio");
-        validateRequired(request.getReportType(), "El tipo de reporte es obligatorio");
+        validateRequired(request.title(), "El titulo es obligatorio");
+        validateRequired(request.reportType(), "El tipo de reporte es obligatorio");
 
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            String status = request.getStatus().trim().toUpperCase();
+        if (request.status() != null && !request.status().isBlank()) {
+            String status = request.status().trim().toUpperCase();
             if (!ALLOWED_STATUSES.contains(status)) {
                 throw new IllegalArgumentException("El estado debe ser PENDING, GENERATED o FAILED");
             }

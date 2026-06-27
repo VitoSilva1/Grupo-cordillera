@@ -1,0 +1,21 @@
+resources:
+  - k8s/namespace.yaml
+  - k8s/config.yaml
+  - k8s/databases.yaml
+  - Backend/ms-auth/k8s/configmap.yaml
+  - Backend/ms-auth/k8s/service.yaml
+  - Backend/ms-auth/k8s/deployment.yaml
+  - Backend/ms-kpis/k8s/secret.yaml
+  - Backend/ms-kpis/k8s/configmap.yaml
+  - Backend/ms-kpis/k8s/service.yaml
+  - Backend/ms-kpis/k8s/deployment.yaml
+  - Backend/ms-user/k8s/secret.yaml
+  - Backend/ms-user/k8s/configmap.yaml
+  - Backend/ms-user/k8s/service.yaml
+  - Backend/ms-user/k8s/deployment.yaml
+  - Backend/ms-report/k8s/secret.yaml
+  - Backend/ms-report/k8s/configmap.yaml
+  - Backend/ms-report/k8s/service.yaml
+  - Backend/ms-report/k8s/deployment.yaml
+  - k8s/apps.yaml
+  - k8s/ingress.yaml

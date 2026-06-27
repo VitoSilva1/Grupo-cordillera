@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { kpiService } from '../services/kpiService';
-import type { 
-  KpiSummary, 
-  MonthlySales, 
-  BranchPerformance, 
-  SalesChannel, 
-  Alert 
-} from '../services/kpiService';
 import { KpiCard } from '../components/KpiCard';
 import { alertStatusStrategies } from '../strategies/alertStatusStrategy';
 import { kpiCardStrategies } from '../strategies/kpiCardStrategies';
+import type {
+  Alert,
+  BranchPerformance,
+  KpiSummary,
+  MonthlySales,
+  SalesChannel,
+} from '../types/kpi';
 import {
   Bar,
   BarChart,

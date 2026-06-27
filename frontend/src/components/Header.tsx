@@ -6,7 +6,16 @@ interface HeaderProps {
   onLogout?: () => void;
 }
 
-const roleAvatarMap: Record<string, string> = {
+type RoleAvatarMap = {
+  gerente: string;
+  gerencia: string;
+  supervisor: string;
+  vendedor: string;
+}
+
+type RoleAvatarKey = keyof RoleAvatarMap;
+
+const roleAvatarMap: RoleAvatarMap = {
   gerente: '/avatars/gerente.png',
   gerencia: '/avatars/gerente.png',
   supervisor: '/avatars/supervisor.png',
@@ -23,7 +32,7 @@ const getAvatarByRole = (user: UserProfile | null) => {
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-  const matchingRole = Object.keys(roleAvatarMap).find((role) =>
+  const matchingRole = (Object.keys(roleAvatarMap) as RoleAvatarKey[]).find((role) =>
     normalizedRole.includes(role)
   );
 
