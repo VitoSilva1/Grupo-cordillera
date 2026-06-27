@@ -1,6 +1,6 @@
 import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { Alert } from '../services/kpiService';
+import type { Alert } from '../types/kpi';
 
 interface AlertStatusStrategy {
   className: string;

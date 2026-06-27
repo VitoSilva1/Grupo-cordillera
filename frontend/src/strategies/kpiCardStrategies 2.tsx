@@ -7,7 +7,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { KpiSummary } from '../services/kpiService';
+import type { KpiSummary } from '../types/kpi';
 import { formatCurrency } from '../utils/formatters-utils';
 
 interface KpiCardStrategy {

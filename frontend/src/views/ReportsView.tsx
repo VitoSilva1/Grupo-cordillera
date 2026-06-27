@@ -2,7 +2,7 @@ import { AlertCircle, CheckCircle2, FileText, Plus } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { reportService } from '../services/reportService';
-import type { CreateReportPayload, Report } from '../services/reportService';
+import type { CreateReportPayload, Report } from '../types/report';
 
 const initialForm: CreateReportPayload = {
   title: '',

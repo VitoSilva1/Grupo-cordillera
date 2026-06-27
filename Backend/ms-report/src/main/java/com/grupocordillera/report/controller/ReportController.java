@@ -3,7 +3,6 @@ package com.grupocordillera.report.controller;
 import com.grupocordillera.report.dto.ReportRequest;
 import com.grupocordillera.report.dto.ReportResponse;
 import com.grupocordillera.report.service.ReportService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -31,13 +31,9 @@ public class ReportController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody ReportRequest request) {
-        try {
-            ReportResponse response = ReportResponse.from(reportService.create(request));
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
-        }
+    public ResponseEntity<ReportResponse> create(@Valid @RequestBody ReportRequest request) {
+        ReportResponse response = ReportResponse.from(reportService.create(request));
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping
@@ -51,14 +47,10 @@ public class ReportController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
-        try {
-            return reportService.findById(id)
-                    .map(ReportResponse::from)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body(Map.of("error", "Reporte no encontrado")));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
-        }
+        return reportService.findById(id)
+                .map(ReportResponse::from)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404)
+                        .body(Map.of("error", "Reporte no encontrado")));
     }
 }

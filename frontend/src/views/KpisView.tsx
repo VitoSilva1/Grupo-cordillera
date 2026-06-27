@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { kpiService } from '../services/kpiService';
-import type { KpiSummary } from '../services/kpiService';
 import { KpiCard } from '../components/KpiCard';
 import { kpiCardStrategies } from '../strategies/kpiCardStrategies';
+import type { KpiSummary } from '../types/kpi';
 
 export function KpisView() {
   const [summary, setSummary] = useState<KpiSummary | null>(null);
