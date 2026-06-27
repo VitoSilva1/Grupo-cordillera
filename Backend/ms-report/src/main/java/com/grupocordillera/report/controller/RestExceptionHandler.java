@@ -3,6 +3,7 @@ package com.grupocordillera.report.controller;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -14,6 +15,18 @@ public class RestExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleBadRequest(IllegalArgumentException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError.of("BAD_REQUEST", exception.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationFailure(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(fieldError -> fieldError.getDefaultMessage())
+                .orElse("Validation error");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError.of("VALIDATION_ERROR", message));
     }
 
     @ExceptionHandler(DataAccessException.class)

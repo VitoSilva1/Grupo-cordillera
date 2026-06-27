@@ -41,11 +41,12 @@ class ReportServiceTest {
 
     @Test
     void createShouldSaveReport() {
-        ReportRequest request = new ReportRequest();
-        request.setTitle("Ventas mensuales");
-        request.setDescription("Reporte de ventas del mes");
-        request.setReportType("SALES");
-        request.setStatus("generated");
+        ReportRequest request = new ReportRequest(
+                "Ventas mensuales",
+                "Reporte de ventas del mes",
+                "SALES",
+                "generated"
+        );
 
         Report report = reportService.create(request);
 
@@ -58,9 +59,7 @@ class ReportServiceTest {
 
     @Test
     void createShouldDefaultStatusToPending() {
-        ReportRequest request = new ReportRequest();
-        request.setTitle("Stock");
-        request.setReportType("INVENTORY");
+        ReportRequest request = new ReportRequest("Stock", null, "INVENTORY", null);
 
         Report report = reportService.create(request);
 
@@ -69,10 +68,7 @@ class ReportServiceTest {
 
     @Test
     void createShouldRejectInvalidStatus() {
-        ReportRequest request = new ReportRequest();
-        request.setTitle("Inventario");
-        request.setReportType("INVENTORY");
-        request.setStatus("DONE");
+        ReportRequest request = new ReportRequest("Inventario", null, "INVENTORY", "DONE");
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,

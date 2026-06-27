@@ -1,44 +1,21 @@
 package com.grupocordillera.report.dto;
 
-public class ReportRequest {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-    private String title;
-    private String description;
-    private String reportType;
-    private String status;
+public record ReportRequest(
+        @NotBlank(message = "El titulo es obligatorio")
+        @Size(max = 150, message = "El titulo no puede superar 150 caracteres")
+        String title,
 
-    public ReportRequest() {
-    }
+        @Size(max = 500, message = "La descripcion no puede superar 500 caracteres")
+        String description,
 
-    public String getTitle() {
-        return title;
-    }
+        @NotBlank(message = "El tipo de reporte es obligatorio")
+        @Size(max = 50, message = "El tipo de reporte no puede superar 50 caracteres")
+        String reportType,
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getReportType() {
-        return reportType;
-    }
-
-    public void setReportType(String reportType) {
-        this.reportType = reportType;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+        @Size(max = 30, message = "El estado no puede superar 30 caracteres")
+        String status
+) {
 }

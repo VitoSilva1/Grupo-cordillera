@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { kpiService } from '../services/kpiService';
-import type { Alert } from '../services/kpiService';
 import { alertStatusStrategies } from '../strategies/alertStatusStrategy';
+import type { Alert } from '../types/kpi';
 
 export function AlertsView() {
   const [alerts, setAlerts] = useState<Alert[]>([]);

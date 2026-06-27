@@ -63,6 +63,11 @@ public class UserService {
         return fullName.isBlank() ? user.getUsername() : fullName;
     }
 
+    /**
+     * Validates the UserDto for registration.
+     * 
+     * @param userDto
+     */
     private void validateRegisterDto(UserDto userDto) {
         if (userDto == null) {
             throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");

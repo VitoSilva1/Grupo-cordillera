@@ -1,15 +1,16 @@
+import { useState } from 'react';
 import { Route, Switch } from 'wouter';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
-import { Login } from './components/Login';
+
+import { Header, Sidebar, Login } from './components';
 import { Dashboard } from './views/Dashboard';
 import { KpisView } from './views/KpisView';
 import { AlertsView } from './views/AlertsView';
 import { CreateUser } from './views/CreateUser';
 import { ReportsView } from './views/ReportsView';
 import type { UserProfile } from './types/user';
+
 import { clearSessionUser, getSessionUser, saveSessionUser } from './utils/session-utils';
-import { useState } from 'react';
+
 import './App.css';
 
 function App() {
