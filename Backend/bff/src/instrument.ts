@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nestjs";
+import * as Sentry from '@sentry/node';
 
 Sentry.init({
   dsn: process.env.GLITCHTIP_DSN,

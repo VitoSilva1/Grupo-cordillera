@@ -5,4 +5,4 @@ metadata:
   namespace: grupo-cordillera
 data:
   USER_SERVICE_URL: http://user-service:8082/api/users
-  GLITCHTIP_DSN: ""
+  GLITCHTIP_DSN: "http://995cfa69b10d49749463e2e75a2ce9a4@host.docker.internal:8000/3"

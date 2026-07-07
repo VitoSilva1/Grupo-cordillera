@@ -6,4 +6,4 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: jdbc:postgresql://report-db:5432/report_db
   SPRING_DATASOURCE_USERNAME: report_user
-  GLITCHTIP_DSN: ""
+  GLITCHTIP_DSN: "http://995cfa69b10d49749463e2e75a2ce9a4@host.docker.internal:8000/3"

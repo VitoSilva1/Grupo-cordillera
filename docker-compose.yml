@@ -199,6 +199,7 @@ services:
         VITE_USER_API_URL: /api/users
         VITE_KPIS_API_URL: /api/kpis
         VITE_REPORTS_API_URL: /api/reports
+        VITE_GLITCHTIP_DSN: http://6652a2a54abd4bfeae30781707ad12c1@localhost:8000/1
     image: grupo-cordillera-front-web2:latest
     container_name: grupo-cordillera-front
     restart: unless-stopped
