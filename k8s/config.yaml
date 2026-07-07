@@ -26,3 +26,4 @@ data:
   USER_API_URL: http://user-service:8082/api/users
   REPORT_API_URL: http://report-service:8082/api/reports
   ALLOWED_ORIGINS: http://localhost,http://localhost:5173,http://grupo-cordillera.local
+  GLITCHTIP_DSN: "http://a02d1b115e3f493b83c29c53d5ce95d5@host.docker.internal:8000/2"

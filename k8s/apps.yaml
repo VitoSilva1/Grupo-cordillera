@@ -47,6 +47,11 @@ spec:
                 configMapKeyRef:
                   name: grupo-cordillera-config
                   key: ALLOWED_ORIGINS
+            - name: GLITCHTIP_DSN
+              valueFrom:
+                configMapKeyRef:
+                  name: grupo-cordillera-config
+                  key: GLITCHTIP_DSN
           readinessProbe:
             httpGet:
               path: /health

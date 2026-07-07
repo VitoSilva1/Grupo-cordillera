@@ -10,7 +10,12 @@ import { KpisClient } from './clients/kpis.client';
 import { ReportClient } from './clients/report.client';
 
 @Module({
-  imports: [AuthModule, UsersModule, KpisModule, ReportsModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    KpisModule,
+    ReportsModule,
+  ],
   controllers: [HealthController],
   providers: [AuthClient, UserClient, KpisClient, ReportClient],
   exports: [AuthClient, UserClient, KpisClient, ReportClient],
