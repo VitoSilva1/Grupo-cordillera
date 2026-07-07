@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { HealthController } from './modules/health/health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -10,7 +11,13 @@ import { KpisClient } from './clients/kpis.client';
 import { ReportClient } from './clients/report.client';
 
 @Module({
-  imports: [AuthModule, UsersModule, KpisModule, ReportsModule],
+  imports: [
+    SentryModule.forRoot(),
+    AuthModule,
+    UsersModule,
+    KpisModule,
+    ReportsModule,
+  ],
   controllers: [HealthController],
   providers: [AuthClient, UserClient, KpisClient, ReportClient],
   exports: [AuthClient, UserClient, KpisClient, ReportClient],

@@ -6,3 +6,4 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: jdbc:postgresql://kpis-db:5432/kpis_db
   SPRING_DATASOURCE_USERNAME: kpis_user
+  GLITCHTIP_DSN: ""

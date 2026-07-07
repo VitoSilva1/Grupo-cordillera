@@ -5,3 +5,4 @@ metadata:
   namespace: grupo-cordillera
 data:
   USER_SERVICE_URL: http://user-service:8082/api/users
+  GLITCHTIP_DSN: ""

@@ -6,3 +6,4 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: jdbc:postgresql://report-db:5432/report_db
   SPRING_DATASOURCE_USERNAME: report_user
+  GLITCHTIP_DSN: ""
