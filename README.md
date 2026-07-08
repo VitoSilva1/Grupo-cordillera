@@ -85,6 +85,161 @@ Host esperado para la presentacion:
 http://grupo-cordillera.local
 ```
 
+## Observabilidad con GlitchTip
+
+GlitchTip se usa como servidor compatible con Sentry para recibir eventos de error del frontend, BFF y microservicios. No reemplaza los logs de consola de Kubernetes: GlitchTip agrupa excepciones como issues, mientras que `kubectl logs` sigue siendo la fuente para logs normales de contenedor.
+
+Flujo general:
+
+```text
+Frontend React -> @sentry/react -> GlitchTip
+BFF NestJS -> @sentry/node -> GlitchTip
+Microservicios Spring Boot -> logs con kubectl
+```
+
+Nota: los microservicios Java mantienen la variable `GLITCHTIP_DSN` en sus `ConfigMap`, pero el starter automatico de Sentry fue retirado porque la version usada no es compatible con Spring Boot 4.0.6 y provocaba `CrashLoopBackOff`. Para esos servicios, la observabilidad operativa actual se revisa con `kubectl logs`.
+
+### Levantar GlitchTip con Docker
+
+Desde la raiz del proyecto:
+
+```powershell
+docker compose -f docker-compose-glitchtip.yml up -d
+```
+
+Verificar contenedores:
+
+```powershell
+docker compose -f docker-compose-glitchtip.yml ps
+```
+
+Abrir GlitchTip:
+
+```text
+http://localhost:8000
+```
+
+Si es la primera ejecucion o la base esta vacia, aplicar migraciones:
+
+```powershell
+docker compose -f docker-compose-glitchtip.yml exec web ./manage.py migrate
+```
+
+Crear usuario administrador:
+
+```powershell
+docker compose -f docker-compose-glitchtip.yml exec web ./manage.py createsuperuser
+```
+
+Luego entrar a `http://localhost:8000`, crear los proyectos necesarios y copiar sus DSN.
+
+### Configuracion de DSN
+
+El frontend corre en el navegador del usuario, por lo que puede apuntar a GlitchTip con `localhost`:
+
+```text
+http://CLAVE_PUBLICA@localhost:8000/ID_PROYECTO_FRONTEND
+```
+
+El BFF y los microservicios corren dentro de Kubernetes. Para que esos pods lleguen al GlitchTip levantado en Docker Desktop, deben usar `host.docker.internal`:
+
+```text
+http://CLAVE_PUBLICA@host.docker.internal:8000/ID_PROYECTO_BACKEND
+```
+
+Archivos principales:
+
+```text
+frontend/Dockerfile
+frontend/src/main.tsx
+docker-compose.yml
+k8s/config.yaml
+backend/bff/src/instrument.ts
+backend/ms-auth/k8s/configmap.yaml
+backend/ms-user/k8s/configmap.yaml
+backend/ms-kpis/k8s/configmap.yaml
+backend/ms-report/k8s/configmap.yaml
+```
+
+### Levantar el proyecto en Kubernetes
+
+Antes de desplegar, construir las imagenes locales:
+
+```powershell
+docker compose build
+```
+
+Aplicar los manifiestos:
+
+```powershell
+kubectl apply -k .
+```
+
+Reiniciar los deployments para que tomen imagenes y `ConfigMap` actualizados:
+
+```powershell
+kubectl rollout restart deployment/auth-service -n grupo-cordillera
+kubectl rollout restart deployment/user-service -n grupo-cordillera
+kubectl rollout restart deployment/kpis-service -n grupo-cordillera
+kubectl rollout restart deployment/report-service -n grupo-cordillera
+kubectl rollout restart deployment/bff-service -n grupo-cordillera
+kubectl rollout restart deployment/api-gateway -n grupo-cordillera
+kubectl rollout restart deployment/front-web2 -n grupo-cordillera
+```
+
+Verificar estado:
+
+```powershell
+kubectl get pods -n grupo-cordillera
+kubectl get ingress -n grupo-cordillera
+```
+
+Abrir la aplicacion:
+
+```text
+http://grupo-cordillera.local
+```
+
+Si el host no resuelve, agregar esta linea al archivo `C:\Windows\System32\drivers\etc\hosts` como administrador:
+
+```text
+127.0.0.1 grupo-cordillera.local
+```
+
+### Ver logs e issues
+
+Logs normales de Kubernetes:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/front-web2 -f
+kubectl logs -n grupo-cordillera deployment/bff-service -f
+kubectl logs -n grupo-cordillera deployment/auth-service -f
+kubectl logs -n grupo-cordillera deployment/user-service -f
+kubectl logs -n grupo-cordillera deployment/kpis-service -f
+kubectl logs -n grupo-cordillera deployment/report-service -f
+```
+
+Eventos del cluster:
+
+```powershell
+kubectl get events -n grupo-cordillera --sort-by=.lastTimestamp
+```
+
+Issues de GlitchTip:
+
+```text
+http://localhost:8000 -> Organization -> Project -> Issues
+```
+
+GlitchTip muestra excepciones agrupadas con stack trace, ambiente, fecha, URL y cantidad de ocurrencias. Los mensajes normales de `console.log`, `log.info` o logs de arranque se revisan con `kubectl logs`.
+
+Para verificar que los pods tienen DSN:
+
+```powershell
+kubectl exec -n grupo-cordillera deployment/bff-service -- printenv GLITCHTIP_DSN
+kubectl exec -n grupo-cordillera deployment/auth-service -- printenv GLITCHTIP_DSN
+```
+
 ## Pruebas
 
 Cada microservicio Java usa Maven, JUnit y JaCoCo:
