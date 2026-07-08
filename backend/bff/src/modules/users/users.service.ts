@@ -6,7 +6,7 @@ import { UserClient } from '../../clients/user.client';
 export class UsersService {
   constructor(private readonly userClient: UserClient) {}
 
-  proxy(request: Request, response: Response): Promise<void> {
-    return this.userClient.proxy(request, response);
+  async proxy(request: Request, response: Response): Promise<void> {
+    await this.userClient.proxy(request, response);
   }
 }

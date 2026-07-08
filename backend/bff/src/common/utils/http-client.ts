@@ -23,12 +23,17 @@ const parsePayload = async (response: globalThis.Response): Promise<unknown> => 
     : response.text();
 };
 
+export interface ProxyResult {
+  status: number;
+  payload: unknown;
+}
+
 export async function proxyRequest(
   request: Request,
   response: Response,
   baseUrl: string,
   publicPrefix: string,
-): Promise<void> {
+): Promise<ProxyResult> {
   const targetPath = request.originalUrl.replace(publicPrefix, '') || '';
   const targetUrl = `${baseUrl}${targetPath}`;
   const upstream = await fetch(targetUrl, {
@@ -38,6 +43,11 @@ export async function proxyRequest(
   });
   const payload = await parsePayload(upstream);
   response.status(upstream.status).send(payload);
+
+  return {
+    status: upstream.status,
+    payload,
+  };
 }
 
 export async function getJson<T>(url: string): Promise<T> {

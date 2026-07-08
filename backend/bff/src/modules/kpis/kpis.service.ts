@@ -6,7 +6,7 @@ import { KpisClient } from '../../clients/kpis.client';
 export class KpisService {
   constructor(private readonly kpisClient: KpisClient) {}
 
-  proxy(request: Request, response: Response): Promise<void> {
-    return this.kpisClient.proxy(request, response);
+  async proxy(request: Request, response: Response): Promise<void> {
+    await this.kpisClient.proxy(request, response);
   }
 }
