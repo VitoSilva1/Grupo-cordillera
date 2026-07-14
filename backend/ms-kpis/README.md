@@ -25,6 +25,7 @@ Frontend
 | Base de datos | PostgreSQL `kpis_db` |
 | Swagger | `http://localhost:9081/swagger-ui/index.html` |
 | OpenAPI JSON | `http://localhost:9081/v3/api-docs` |
+| Observabilidad | Logs Spring Boot por Docker/Kubernetes; sin SDK Sentry activo |
 
 ## URLs importantes
 
@@ -41,6 +42,9 @@ Frontend
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5434/kpis_db` |
 | `SPRING_DATASOURCE_USERNAME` | `kpis_user` |
 | `SPRING_DATASOURCE_PASSWORD` | `kpis_pass` |
+| `GLITCHTIP_DSN` | Disponible en Kubernetes, pero sin starter Sentry activo en el `pom.xml` |
+
+`GLITCHTIP_DSN` queda definido en el `ConfigMap` para mantener la configuracion preparada, pero este microservicio no envia eventos a GlitchTip directamente. El starter Sentry fue retirado por incompatibilidad con Spring Boot 4.0.6.
 
 ## Como ejecutar
 
@@ -141,3 +145,17 @@ mvn verify
 ```
 
 JaCoCo valida minimo 60% de cobertura de lineas.
+
+## Logs
+
+Docker Compose:
+
+```bash
+docker compose logs -f kpis-service
+```
+
+Kubernetes:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/kpis-service -f
+```

@@ -1,25 +1,36 @@
 flowchart LR
-  Browser["Browser"] --> Frontend["front-web2\nReact / TypeScript\nlocalhost:5173"]
-  Frontend --> Gateway["api-gateway\Krakend\nlocalhost:8088"]
-  Gateway --> BFF["bff-service\nNode.js / Express\nlocalhost:8000"]
+  Browser["Browser"] --> Frontend["front-web2\nReact / TypeScript\nNginx\nlocalhost:5173"]
+  Browser --> Ingress["Ingress nginx\nKubernetes\nhttp://grupo-cordillera.local"]
 
-  BFF --> Auth["ms-auth\nSpring Boot\nlocalhost:9080"]
-  BFF --> User["ms-user\nSpring Boot\nlocalhost:9082"]
-  BFF --> Kpis["ms-kpis\nSpring Boot\nlocalhost:9081"]
-  DirectClient["Direct API testing\nSwagger / Postman"] --> Report["ms-report\nSpring Boot\nlocalhost:9083"]
+  Ingress -->|"GET /"| Frontend
+  Ingress -->|"GET/POST /api"| Gateway["api-gateway\nKrakenD\n:8088"]
+  Frontend -->|"Docker Compose /api"| Gateway
+  Gateway --> BFF["bff-service\nNestJS / Node.js\n:8000"]
 
-  Auth -->|"HTTP USER_SERVICE_URL\n/api/users/authenticate\n/api/users"| User
+  BFF --> Auth["ms-auth\nSpring Boot\nhost:9080 / pod:8080"]
+  BFF --> User["ms-user\nSpring Boot\nhost:9082 / pod:8082"]
+  BFF --> Kpis["ms-kpis\nSpring Boot\nhost:9081 / pod:8081"]
+  BFF --> Report["ms-report\nSpring Boot\nhost:9083 / pod:8082"]
 
-  User --> UserDb[("user_db\nPostgreSQL\nlocalhost:5435")]
-  Kpis --> KpisDb[("kpis_db\nPostgreSQL\nlocalhost:5434")]
-  Report --> ReportDb[("report_db\nPostgreSQL\nlocalhost:5436")]
+  Auth -->|"USER_SERVICE_URL\n/api/users/authenticate\n/api/users"| User
 
-  AuthNoDb["ms-auth has no own database"] -.-> Auth
+  User --> UserDb[("user_db\nPostgreSQL\nhost:5435 / pod:5432")]
+  Kpis --> KpisDb[("kpis_db\nPostgreSQL\nhost:5434 / pod:5432")]
+  Report --> ReportDb[("report_db\nPostgreSQL\nhost:5436 / pod:5432")]
+
+  Frontend -.->|"@sentry/react DSN localhost:8000"| GlitchTip["GlitchTip\nlocalhost:8000"]
+  BFF -.->|"@sentry/node DSN host.docker.internal:8000"| GlitchTip
+  Auth -.->|"logs"| KubeLogs["kubectl logs / docker compose logs"]
+  User -.->|"logs"| KubeLogs
+  Kpis -.->|"logs"| KubeLogs
+  Report -.->|"logs"| KubeLogs
+
+  AuthNoDb["ms-auth no tiene base propia"] -.-> Auth
 
   classDef service fill:#e8f3ff,stroke:#2f6ea5,color:#102a43
   classDef database fill:#f2f8ea,stroke:#5b8c2a,color:#22330f
-  classDef note fill:#fff4dd,stroke:#b37b00,color:#3b2600
+  classDef obs fill:#fff4dd,stroke:#b37b00,color:#3b2600
 
-  class Frontend,Gateway,BFF,Auth,User,Kpis,Report,DirectClient service
+  class Frontend,Ingress,Gateway,BFF,Auth,User,Kpis,Report service
   class UserDb,KpisDb,ReportDb database
-  class AuthNoDb note
+  class GlitchTip,KubeLogs,AuthNoDb obs

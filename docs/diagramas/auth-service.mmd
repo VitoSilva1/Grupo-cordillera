@@ -11,3 +11,4 @@ flowchart TB
   UserApi --> UserDb[("user_db\nPostgreSQL")]
 
   NoDb["No local auth database"] -.-> AuthService
+  AuthService -.->|"Spring Boot logs"| Logs["kubectl logs / docker compose logs"]

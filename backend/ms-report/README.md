@@ -25,6 +25,7 @@ Frontend
 | Base de datos | PostgreSQL `report_db` |
 | Swagger | `http://localhost:9083/swagger-ui/index.html` |
 | OpenAPI JSON | `http://localhost:9083/v3/api-docs` |
+| Observabilidad | Logs Spring Boot por Docker/Kubernetes; sin SDK Sentry activo |
 
 ## URLs importantes
 
@@ -43,6 +44,11 @@ Frontend
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5436/report_db` |
 | `SPRING_DATASOURCE_USERNAME` | `report_user` |
 | `SPRING_DATASOURCE_PASSWORD` | `report_pass` |
+| `GLITCHTIP_DSN` | Disponible en Kubernetes, pero sin starter Sentry activo en el `pom.xml` |
+
+`ms-report` escucha internamente en el puerto `8082`, igual que `ms-user`, porque cada servicio corre en su propio contenedor/pod. Docker Compose lo publica en el host como `9083`.
+
+`GLITCHTIP_DSN` queda definido en el `ConfigMap` para mantener la configuracion preparada, pero este microservicio no envia eventos a GlitchTip directamente. El starter Sentry fue retirado por incompatibilidad con Spring Boot 4.0.6.
 
 ## Como ejecutar
 
@@ -120,3 +126,17 @@ mvn verify
 ```
 
 JaCoCo valida minimo 60% de cobertura de lineas.
+
+## Logs
+
+Docker Compose:
+
+```bash
+docker compose logs -f report-service
+```
+
+Kubernetes:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/report-service -f
+```
