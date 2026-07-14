@@ -8,12 +8,12 @@ El gateway recibe las peticiones del frontend y las reenvia al BFF.
 
 ```text
 Frontend
-  -> api-gateway :8088
+  -> api-gateway KrakenD :8088
     -> bff-service :8000
       -> ms-auth / ms-user / ms-kpis / ms-report
 ```
 
-No contiene logica de negocio. Su trabajo es exponer endpoints publicos, aplicar configuracion transversal de CORS y delegar las solicitudes al BFF.
+No contiene logica de negocio. Su trabajo es exponer endpoints publicos, aplicar configuracion transversal de CORS y delegar las solicitudes al BFF. En Kubernetes, el Ingress envia el path `/api` hacia este servicio. En Docker Compose, el Nginx del frontend proxy pasa `/api/` a `api-gateway:8088`.
 
 ## Tabla tecnica
 
@@ -23,7 +23,7 @@ No contiene logica de negocio. Su trabajo es exponer endpoints publicos, aplicar
 | Rol | API Gateway |
 | Puerto local | `8088` |
 | Puerto interno | `8088` |
-| Backend principal | `bff-service:8000` |
+| Backend principal | `http://bff-service:8000` |
 | Imagen base | `krakend:2.13` |
 | Configuracion | `krakend.json` |
 | Patrones | API Gateway, Reverse Proxy, Fachada |

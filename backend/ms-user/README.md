@@ -27,6 +27,7 @@ ms-auth
 | Base de datos | PostgreSQL `user_db` |
 | Swagger | `http://localhost:9082/swagger-ui/index.html` |
 | OpenAPI JSON | `http://localhost:9082/v3/api-docs` |
+| Observabilidad | Logs Spring Boot por Docker/Kubernetes; sin SDK Sentry activo |
 
 ## URLs importantes
 
@@ -44,6 +45,9 @@ ms-auth
 | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5435/user_db` |
 | `SPRING_DATASOURCE_USERNAME` | `user_user` |
 | `SPRING_DATASOURCE_PASSWORD` | `user_pass` |
+| `GLITCHTIP_DSN` | Disponible en Kubernetes, pero sin starter Sentry activo en el `pom.xml` |
+
+`GLITCHTIP_DSN` queda definido en el `ConfigMap` para mantener la configuracion preparada, pero este microservicio no envia eventos a GlitchTip directamente. El starter Sentry fue retirado por incompatibilidad con Spring Boot 4.0.6.
 
 ## Como ejecutar
 
@@ -134,3 +138,17 @@ mvn verify
 ```
 
 JaCoCo valida minimo 60% de cobertura de lineas.
+
+## Logs
+
+Docker Compose:
+
+```bash
+docker compose logs -f user-service
+```
+
+Kubernetes:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/user-service -f
+```

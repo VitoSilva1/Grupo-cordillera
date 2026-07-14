@@ -1,12 +1,17 @@
 flowchart LR
-  Frontend["front-web2\nReact / TypeScript"] --> BFF["bff-service\nNode.js / Express"]
+  Frontend["front-web2\nReact / TypeScript"] --> Gateway["api-gateway\nKrakenD"]
+  Gateway --> BFF["bff-service\nNestJS / Node.js"]
 
   BFF --> Auth["/api/auth/*\nAUTH_API_URL"]
   BFF --> Users["/api/users/*\nUSER_API_URL"]
   BFF --> Kpis["/api/kpis/*\nKPIS_API_URL"]
+  BFF --> Reports["/api/reports/*\nREPORT_API_URL"]
 
   Auth --> AuthService["ms-auth"]
   Users --> UserService["ms-user"]
   Kpis --> KpisService["ms-kpis"]
+  Reports --> ReportService["ms-report"]
 
-  BFF --> Cors["CORS\nallowed frontend origins"]
+  BFF --> Cors["CORS\nALLOWED_ORIGINS"]
+  BFF -.->|"Login exitoso / Reporte creado"| GlitchTip["GlitchTip\n@sentry/node"]
+  BFF -.->|"business_metric logs"| Logs["kubectl logs\nBFF container logs"]

@@ -19,3 +19,4 @@ flowchart TB
 
   Repository --> KpisDb[("kpis_db\nPostgreSQL")]
   KpisDb --> Flyway["Flyway migrations\nKPI schema + seed data"]
+  KpisService -.->|"Spring Boot logs"| Logs["kubectl logs / docker compose logs"]

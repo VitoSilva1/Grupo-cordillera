@@ -1,6 +1,6 @@
 # bff - Grupo Cordillera
 
-Backend For Frontend construido con NestJS y TypeScript. Es la capa que habla con el frontend y oculta la complejidad de los microservicios.
+Backend For Frontend construido con NestJS y TypeScript. Es la capa que habla con el frontend, oculta la complejidad de los microservicios y centraliza los eventos GlitchTip del backend Node.
 
 ## Que hace
 
@@ -21,6 +21,8 @@ El BFF no debe tener logica pesada de negocio. Su responsabilidad es:
 - Enrutar peticiones hacia microservicios.
 - Manejar errores de integracion.
 - Mantener al frontend desacoplado de las URLs internas.
+- Emitir eventos informativos a GlitchTip para login exitoso y creacion de reportes.
+- Registrar metricas de negocio en logs del contenedor.
 
 ## Tabla tecnica
 
@@ -30,10 +32,11 @@ El BFF no debe tener logica pesada de negocio. Su responsabilidad es:
 | Runtime | Node.js 22 |
 | Framework | NestJS 11.1.9 |
 | TypeScript | 5.9.3 |
-| Librerias | `@nestjs/common` 11.1.9, `@nestjs/core` 11.1.9, `@nestjs/platform-express` 11.1.9, `reflect-metadata` 0.2.2, `rxjs` 7.8.2 |
+| Librerias | `@nestjs/common` 11.1.9, `@nestjs/core` 11.1.9, `@nestjs/platform-express` 11.1.9, `@sentry/node` 8.55.2, `reflect-metadata` 0.2.2, `rxjs` 7.8.2 |
 | Testing | Jest 30.4.2, ts-jest 29.4.6, Supertest 7.2.2, `@nestjs/testing` 11.1.9 |
 | Patrones | Backend for Frontend, API Facade, Proxy, Domain Modules, HTTP Client Adapter |
 | Swagger | No aplica en el BFF. Swagger esta en los microservicios Java |
+| Observabilidad | GlitchTip/Sentry en `src/instrument.ts` y logs NestJS |
 | Cobertura | Jest configurado con minimo 60% global |
 
 ## Estructura
@@ -78,8 +81,37 @@ src/
 | `KPIS_API_URL` | `http://localhost:8081/api/kpis` |
 | `REPORT_API_URL` | `http://localhost:8082/api/reports` |
 | `ALLOWED_ORIGINS` | `http://localhost:5173` |
+| `GLITCHTIP_DSN` | Vacio por defecto; en Kubernetes apunta a `host.docker.internal:8000` |
 
-En Docker Compose estas URLs apuntan a nombres internos de contenedores.
+En Docker Compose estas URLs apuntan a nombres internos de contenedores. El `docker-compose.yml` actual no define `GLITCHTIP_DSN` para el BFF porque GlitchTip usa el mismo puerto host `8000`; la integracion GlitchTip del BFF esta preparada principalmente para el despliegue Kubernetes local.
+
+Nota: `ms-report` escucha en el puerto interno `8082`; Docker Compose lo publica en el host como `9083`.
+
+## Observabilidad
+
+El BFF usa `@sentry/node` para enviar eventos a GlitchTip cuando `GLITCHTIP_DSN` esta configurado.
+
+Eventos enviados a GlitchTip:
+
+| Accion | Mensaje en GlitchTip | Tags |
+|---|---|---|
+| Login exitoso | `Login exitoso` | `business_metric=login_success`, `feature=auth` |
+| Reporte creado | `Reporte creado` | `business_metric=report_created`, `feature=reports` |
+
+Logs normales del contenedor:
+
+```text
+business_metric=login_success total_logins=N user=...
+business_metric=report_created total_reports_created=N
+```
+
+En Kubernetes se revisan con:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/bff-service -f
+```
+
+GlitchTip agrupa esos mensajes como issues/eventos; no funciona como visor de logs continuo.
 
 ## Como ejecutar
 

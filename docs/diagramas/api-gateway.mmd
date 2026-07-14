@@ -1,11 +1,17 @@
 flowchart LR
-  Browser["Browser / Frontend"] --> Gateway["API Gateway\nNginx :8088"]
+  Browser["Browser"] --> Frontend["front-web2\nNginx"]
+  Browser --> Ingress["Ingress nginx\nKubernetes"]
 
-  Gateway --> BFF["BFF Service\nNode.js / Express :8000"]
-  BFF --> Auth["ms-auth\nSpring Boot :9080"]
-  BFF --> Users["ms-user\nSpring Boot :9082"]
-  BFF --> Kpis["ms-kpis\nSpring Boot :9081"]
+  Frontend -->|"Docker Compose /api/"| Gateway["API Gateway\nKrakenD :8088"]
+  Ingress -->|"Kubernetes /api"| Gateway
+
+  Gateway --> BFF["BFF Service\nNestJS :8000"]
+  BFF --> Auth["ms-auth\nSpring Boot :8080"]
+  BFF --> Users["ms-user\nSpring Boot :8082"]
+  BFF --> Kpis["ms-kpis\nSpring Boot :8081"]
+  BFF --> Reports["ms-report\nSpring Boot :8082"]
 
   Auth --> Users
   Users --> UserDb[("user_db\nPostgreSQL")]
   Kpis --> KpisDb[("kpis_db\nPostgreSQL")]
+  Reports --> ReportDb[("report_db\nPostgreSQL")]
