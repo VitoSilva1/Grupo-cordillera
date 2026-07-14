@@ -23,6 +23,7 @@ Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway
   /informe-endpoints-front-microservicios.md
   /informe-tecnico-notebooklm.md
   /informe-arquitectura-y-patrones.md
+  /informe-proyecto-grupo-cordillera-examen.md
 /k8s
 ```
 
