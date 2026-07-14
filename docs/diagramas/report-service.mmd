@@ -9,3 +9,4 @@ flowchart TB
 
   Repository --> ReportDb[("report_db\nPostgreSQL")]
   ReportDb --> Flyway["Flyway migrations\nreports schema + seed data"]
+  ReportService -.->|"Spring Boot logs"| Logs["kubectl logs / docker compose logs"]

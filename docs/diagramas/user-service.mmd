@@ -9,3 +9,4 @@ flowchart TB
 
   Repository --> UserDb[("user_db\nPostgreSQL")]
   UserDb --> Flyway["Flyway migrations\nusers schema + seed data"]
+  UserService -.->|"Spring Boot logs"| Logs["kubectl logs / docker compose logs"]

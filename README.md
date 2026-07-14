@@ -1,6 +1,6 @@
 # Grupo Cordillera - Proyecto Final
 
-Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway, Backend for Frontend y microservicios Spring Boot. El proyecto esta organizado para entrega academica, ejecucion local con Docker Compose y presentacion sobre Kubernetes.
+Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway, Backend for Frontend y microservicios Spring Boot. El proyecto esta organizado para entrega academica, ejecucion local con Docker Compose, observabilidad con GlitchTip y despliegue local sobre Kubernetes en Docker Desktop.
 
 ## Estructura del repositorio
 
@@ -15,9 +15,15 @@ Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway
 /frontend
 /docs
   /diagramas
-  /presentation.pdf
-  /report.pdf
+  /Presentacion.pptx
+  /Reporte del proyecto.pdf
+  /Reporte del proyecto.docx
+  /coverage-report.pdf
   /caso-estudio.pdf
+  /informe-endpoints-front-microservicios.md
+  /informe-tecnico-notebooklm.md
+  /informe-arquitectura-y-patrones.md
+  /informe-proyecto-grupo-cordillera-examen.md
 /k8s
 ```
 
@@ -25,22 +31,22 @@ Sistema de dashboard empresarial construido con frontend TypeScript, API Gateway
 
 ```text
 Browser
-  -> Frontend React/TypeScript
-  -> API Gateway KrakenD
-  -> BFF Node.js/Express
+  -> Frontend React/TypeScript servido por Nginx
+  -> API Gateway KrakenD para /api/*
+  -> BFF NestJS
   -> Microservicios Spring Boot
-  -> PostgreSQL por servicio
+  -> PostgreSQL por servicio con persistencia
 ```
 
-El navegador consume rutas `/api/*`. El API Gateway enruta esas llamadas al BFF, y el BFF actua como fachada hacia los microservicios internos. En el escenario actual se exponen solo las rutas usadas por la UI: login, creacion de usuario, KPIs, listado de reportes y creacion de reportes.
+El navegador consume rutas `/api/*`. En Docker Compose el Nginx del frontend proxy pasa esas rutas al API Gateway; en Kubernetes el Ingress envia `/api` al API Gateway y `/` al frontend. El API Gateway enruta las llamadas al BFF, y el BFF actua como fachada hacia los microservicios internos. En el escenario actual se exponen solo las rutas usadas por la UI: login, creacion de usuario, KPIs, listado de reportes y creacion de reportes.
 
 ## Componentes
 
 | Componente | Ruta | Tecnologia | Responsabilidad |
 |---|---|---|---|
-| Frontend | `frontend/` | React 19.2.5, TypeScript 6.0.2, Vite 8.0.10, Tailwind CSS 4.2.4, Nginx 1.27 | UI, login, dashboard, KPIs, reportes y alertas |
+| Frontend | `frontend/` | React 19.2.5, TypeScript 6.0.2, Vite 8.0.10, Tailwind CSS 4.2.4, Nginx 1.27, `@sentry/react` | UI, login, dashboard, KPIs, reportes, alertas y eventos frontend hacia GlitchTip |
 | API Gateway | `backend/api-gateway/` | KrakenD 2.13 | Entrada HTTP para `/api/*` |
-| BFF | `backend/bff/` | Node.js 22, NestJS 11.1.9, Express | Proxy para el frontend |
+| BFF | `backend/bff/` | Node.js 22, NestJS 11.1.9, Express, `@sentry/node` | Proxy para el frontend, eventos GlitchTip y logs de metricas de negocio |
 | Auth Service | `backend/ms-auth/` | Java 25, Spring Boot 4.0.6, Nimbus JOSE JWT 10.5 | Login y emision de token |
 | User Service | `backend/ms-user/` | Java 25, Spring Boot 4.0.6, JPA, Flyway, PostgreSQL Driver | Gestion y persistencia de usuarios |
 | KPIs Service | `backend/ms-kpis/` | Java 25, Spring Boot 4.0.6, JDBC, Flyway, PostgreSQL Driver | Indicadores del dashboard |
@@ -87,17 +93,27 @@ http://grupo-cordillera.local
 
 ## Observabilidad con GlitchTip
 
-GlitchTip se usa como servidor compatible con Sentry para recibir eventos de error del frontend, BFF y microservicios. No reemplaza los logs de consola de Kubernetes: GlitchTip agrupa excepciones como issues, mientras que `kubectl logs` sigue siendo la fuente para logs normales de contenedor.
+GlitchTip se usa como servidor compatible con Sentry para recibir eventos de error del frontend y del BFF. No reemplaza los logs de consola de Kubernetes: GlitchTip agrupa excepciones o mensajes capturados como issues/eventos, mientras que `kubectl logs` sigue siendo la fuente para logs normales de contenedor.
 
 Flujo general:
 
 ```text
 Frontend React -> @sentry/react -> GlitchTip
 BFF NestJS -> @sentry/node -> GlitchTip
-Microservicios Spring Boot -> logs con kubectl
+BFF NestJS -> Logger NestJS -> kubectl logs / docker compose logs
+Microservicios Spring Boot -> logs con kubectl / docker compose logs
 ```
 
-Nota: los microservicios Java mantienen la variable `GLITCHTIP_DSN` en sus `ConfigMap`, pero el starter automatico de Sentry fue retirado porque la version usada no es compatible con Spring Boot 4.0.6 y provocaba `CrashLoopBackOff`. Para esos servicios, la observabilidad operativa actual se revisa con `kubectl logs`.
+Nota: los microservicios Java mantienen la variable `GLITCHTIP_DSN` en sus `ConfigMap` y propiedades, pero no tienen starter Sentry activo en el `pom.xml`. El starter automatico fue retirado porque la version usada no era compatible con Spring Boot 4.0.6 y provocaba `CrashLoopBackOff`. Para esos servicios, la observabilidad operativa actual se revisa con `kubectl logs`.
+
+El BFF registra dos metricas de negocio:
+
+```text
+business_metric=login_success total_logins=N user=...
+business_metric=report_created total_reports_created=N
+```
+
+Esas lineas se ven como logs normales del BFF. Ademas, el BFF envia mensajes informativos a GlitchTip con los titulos `Login exitoso` y `Reporte creado`, agrupados como issues/eventos por fingerprint.
 
 ### Levantar GlitchTip con Docker
 
@@ -119,6 +135,8 @@ Abrir GlitchTip:
 http://localhost:8000
 ```
 
+Nota: GlitchTip usa el puerto host `8000`, el mismo que el BFF publica cuando se ejecuta `docker compose up` del proyecto completo. Para probar GlitchTip junto con la aplicacion, el flujo documentado es levantar GlitchTip con Docker Compose y la aplicacion en Kubernetes, donde el BFF queda como servicio interno del cluster.
+
 Si es la primera ejecucion o la base esta vacia, aplicar migraciones:
 
 ```powershell
@@ -135,16 +153,16 @@ Luego entrar a `http://localhost:8000`, crear los proyectos necesarios y copiar 
 
 ### Configuracion de DSN
 
-El frontend corre en el navegador del usuario, por lo que puede apuntar a GlitchTip con `localhost`:
+El frontend corre en el navegador del usuario, por lo que su DSN se compila con `localhost`:
 
 ```text
 http://CLAVE_PUBLICA@localhost:8000/ID_PROYECTO_FRONTEND
 ```
 
-El BFF y los microservicios corren dentro de Kubernetes. Para que esos pods lleguen al GlitchTip levantado en Docker Desktop, deben usar `host.docker.internal`:
+El BFF corre dentro de Kubernetes. Para que el pod llegue al GlitchTip levantado en Docker Desktop, usa `host.docker.internal`:
 
 ```text
-http://CLAVE_PUBLICA@host.docker.internal:8000/ID_PROYECTO_BACKEND
+http://CLAVE_PUBLICA@host.docker.internal:8000/ID_PROYECTO_BFF
 ```
 
 Archivos principales:
@@ -231,7 +249,20 @@ Issues de GlitchTip:
 http://localhost:8000 -> Organization -> Project -> Issues
 ```
 
-GlitchTip muestra excepciones agrupadas con stack trace, ambiente, fecha, URL y cantidad de ocurrencias. Los mensajes normales de `console.log`, `log.info` o logs de arranque se revisan con `kubectl logs`.
+GlitchTip muestra excepciones y mensajes capturados por Sentry agrupados con stack trace cuando aplica, ambiente, fecha, URL y cantidad de ocurrencias. Los mensajes normales de `console.log`, `log.info`, logs de Nginx, logs de arranque o probes de Kubernetes se revisan con `kubectl logs`.
+
+Metricas de negocio en logs del BFF:
+
+```powershell
+kubectl logs -n grupo-cordillera deployment/bff-service -f
+```
+
+Buscar las entradas:
+
+```text
+business_metric=login_success
+business_metric=report_created
+```
 
 Para verificar que los pods tienen DSN:
 
@@ -242,7 +273,7 @@ kubectl exec -n grupo-cordillera deployment/auth-service -- printenv GLITCHTIP_D
 
 ## Pruebas
 
-Cada microservicio Java usa Maven, JUnit y JaCoCo:
+Cada microservicio Java usa Maven, JUnit y JaCoCo. Ejecutar desde la carpeta de cada servicio:
 
 ```bash
 mvn verify
@@ -255,12 +286,13 @@ cd backend/bff
 npm test
 ```
 
-## Documentacion
+## Diagramas y documentacion
 
-La carpeta `docs/` contiene exclusivamente documentos de entrega y fuentes de diagramas:
+La carpeta `docs/` contiene documentos de entrega y fuentes de diagramas:
 
-- `docs/repore del proyecto.pdf`
-- `docs/presentation.pdf`
+- `docs/Reporte del proyecto.pdf`
+- `docs/Reporte del proyecto.docx`
+- `docs/Presentacion.pptx`
 - `docs/caso-estudio.pdf`
 - `docs/coverage-report.pdf`
 - `docs/diagramas/*.mmd`
